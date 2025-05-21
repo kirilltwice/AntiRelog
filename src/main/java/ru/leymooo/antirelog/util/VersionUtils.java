@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
 import org.slf4j.Logger;
-import ru.leymooo.antirelog.Antirelog;
+import org.slf4j.LoggerFactory;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,6 +25,12 @@ public class VersionUtils {
     private static Logger logger;
 
     static {
+        try {
+            logger = LoggerFactory.getLogger(VersionUtils.class);
+        } catch (Throwable t) {
+            System.err.println("Не удалось инициализировать SLF4J логгер для VersionUtils.");
+            t.printStackTrace();
+        }
         detectServerVersion();
     }
 
@@ -40,8 +46,11 @@ public class VersionUtils {
     }
 
     private void detectServerVersion() {
+        if (logger == null) {
+            System.err.println("Логгер не был инициализирован в VersionUtils. Попытка определить версию...");
+        }
+
         try {
-            logger = Antirelog.getInstance().getSLF4JLogger();
 
             if (tryParseVersionFromBukkitVersion()) {
                 logDetectedVersion();
@@ -58,7 +67,11 @@ public class VersionUtils {
                 return;
             }
 
-            logger.warn("Не удалось определить версию всеми способами. Устанавливаем {}", DEFAULT_VERSION);
+            if (logger != null) {
+                logger.warn("Не удалось определить версию всеми способами. Устанавливаем {}", DEFAULT_VERSION);
+            } else {
+                System.out.println("Не удалось определить версию всеми способами. Устанавливаем " + DEFAULT_VERSION);
+            }
             String[] defaultVersionParts = DEFAULT_VERSION.split("\\.");
             majorVersion = Integer.parseInt(defaultVersionParts[1]);
             minorVersion = Integer.parseInt(defaultVersionParts[2]);
@@ -66,7 +79,12 @@ public class VersionUtils {
             logDetectedVersion();
 
         } catch (Exception e) {
-            logger.error("Непредвиденная ошибка при определении версии", e);
+            if (logger != null) {
+                logger.error("Непредвиденная ошибка при определении версии", e);
+            } else {
+                System.err.println("Непредвиденная ошибка при определении версии:");
+                e.printStackTrace();
+            }
             majorVersion = 21;
             minorVersion = 4;
             minorVersionResolved = true;
@@ -86,7 +104,11 @@ public class VersionUtils {
                 return true;
             }
         } catch (Exception e) {
-            logger.warn("Не удалось определить версию MC из Bukkit.getVersion()");
+            if (logger != null) {
+                logger.warn("Не удалось определить версию MC из Bukkit.getVersion()", e);
+            } else {
+                System.out.println("Не удалось определить версию MC из Bukkit.getVersion()");
+            }
         }
         return false;
     }
@@ -101,7 +123,11 @@ public class VersionUtils {
             }
             return true;
         } catch (Exception e) {
-            logger.warn("Не удалось определить версию MC из Bukkit.getBukkitVersion()");
+            if (logger != null) {
+                logger.warn("Не удалось определить версию MC из Bukkit.getBukkitVersion()", e);
+            } else {
+                System.out.println("Не удалось определить версию MC из Bukkit.getBukkitVersion()");
+            }
         }
         return false;
     }
@@ -116,13 +142,23 @@ public class VersionUtils {
             }
             return true;
         } catch (Exception e) {
-            logger.warn("Не удалось определить версию MC из имени пакета");
+            if (logger != null) {
+                logger.warn("Не удалось определить версию MC из имени пакета", e);
+            } else {
+                System.out.println("Не удалось определить версию MC из имени пакета");
+            }
         }
         return false;
     }
 
     private void logDetectedVersion() {
-        logger.info("Обнаружена версия: 1.{}.{}", majorVersion, minorVersion);
+        if (logger != null) {
+            String minorVersionStr = minorVersionResolved ? String.valueOf(minorVersion) : (minorVersion == 0 ? "x" : String.valueOf(minorVersion));
+            logger.info("Обнаружена версия: 1.{}.{}", majorVersion, minorVersionStr);
+        } else {
+            String minorVersionStr = minorVersionResolved ? String.valueOf(minorVersion) : (minorVersion == 0 ? "x" : String.valueOf(minorVersion));
+            System.out.println("Обнаружена версия: 1." + majorVersion + "." + minorVersionStr);
+        }
     }
 
     public boolean isPaper21() {
