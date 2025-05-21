@@ -9,6 +9,7 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.reflect.accessors.Accessors;
 import com.comphenix.protocol.reflect.accessors.MethodAccessor;
 import com.comphenix.protocol.utility.MinecraftReflection;
+import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -18,79 +19,139 @@ import ru.leymooo.antirelog.manager.CooldownManager;
 import ru.leymooo.antirelog.manager.CooldownManager.CooldownType;
 import ru.leymooo.antirelog.manager.PvPManager;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.EnumSet;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+@UtilityClass
 public class ProtocolLibUtils {
 
+    private static final int TICK_MS = 50;
+    private static final long THRESHOLD_MS = 100L;
+
     private static boolean hasProtocolLib;
-    private static Class<?> ITEM_CLASS;
-    private static MethodAccessor getItem = null;
-    private static MethodAccessor getMaterial = null;
+    private static Class<?> itemClass;
+    private static MethodAccessor getItemMethod;
+    private static MethodAccessor getMaterialMethod;
 
     static {
-        hasProtocolLib = Bukkit.getPluginManager().isPluginEnabled("ProtocolLib") && VersionUtils.isVersion(9);
-        if (hasProtocolLib) {
-            boolean is117 = VersionUtils.isVersion(17);
-            ITEM_CLASS = MinecraftReflection.getMinecraftClass(is117 ? "world.item.Item" :"Item");
-            getItem = Accessors.getMethodAccessor(MinecraftReflection
-                            .getCraftBukkitClass("util.CraftMagicNumbers"),
-                    "getItem", Material.class);
-            getMaterial = Accessors.getMethodAccessor(MinecraftReflection
-                            .getCraftBukkitClass("util.CraftMagicNumbers"),
-                    "getMaterial", ITEM_CLASS);
-        }
-
+        initProtocolLib();
     }
 
-    public static PacketContainer createCooldownPacket(Material material, int ticks) {
+    private static void initProtocolLib() {
+        hasProtocolLib = Bukkit.getPluginManager().isPluginEnabled("ProtocolLib") && VersionUtils.isVersion(9);
+
+        if (hasProtocolLib) {
+            try {
+                boolean is117OrAbove = VersionUtils.isVersion(17);
+                String itemClassName = is117OrAbove ? "world.item.Item" : "Item";
+
+                itemClass = MinecraftReflection.getMinecraftClass(itemClassName);
+
+                getItemMethod = Accessors.getMethodAccessor(
+                        MinecraftReflection.getCraftBukkitClass("util.CraftMagicNumbers"),
+                        "getItem",
+                        Material.class
+                );
+
+                getMaterialMethod = Accessors.getMethodAccessor(
+                        MinecraftReflection.getCraftBukkitClass("util.CraftMagicNumbers"),
+                        "getMaterial",
+                        itemClass
+                );
+            } catch (Exception e) {
+                Bukkit.getLogger().severe("[AntiRelog] Ошибка инициализации ProtocolLib: " + e.getMessage());
+                hasProtocolLib = false;
+            }
+        }
+    }
+
+    public boolean isAvailable() {
+        return hasProtocolLib && getItemMethod != null && getMaterialMethod != null;
+    }
+
+    public PacketContainer createCooldownPacket(Material material, int ticks) {
+        if (!isAvailable()) {
+            throw new IllegalStateException("ProtocolLib не доступен");
+        }
+
         PacketContainer packetContainer = new PacketContainer(PacketType.Play.Server.SET_COOLDOWN);
         packetContainer.getModifier().writeDefaults();
-        packetContainer.getModifier().withType(ITEM_CLASS).write(0, getItem.invoke(null, material));
+        packetContainer.getModifier().withType(itemClass).write(0, getItemMethod.invoke(null, material));
         packetContainer.getIntegers().write(0, ticks);
-        return packetContainer;
 
+        return packetContainer;
     }
 
-    public static void sendPacket(PacketContainer packetContainer, Player player) {
+    public void sendPacket(PacketContainer packetContainer, Player player) {
+        if (!isAvailable() || player == null || !player.isOnline()) {
+            return;
+        }
+
         try {
             ProtocolLibrary.getProtocolManager().sendServerPacket(player, packetContainer);
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            Bukkit.getLogger().warning("[AntiRelog] Ошибка отправки пакета: " + e.getMessage());
         }
     }
 
-    public static void createListener(CooldownManager cooldownManager, PvPManager pvPManager, Plugin plugin) {
+    public void createListener(CooldownManager cooldownManager, PvPManager pvpManager, Plugin plugin) {
+        if (!isAvailable()) {
+            Bukkit.getLogger().warning("[AntiRelog] Невозможно создать слушатель пакетов: ProtocolLib не доступен");
+            return;
+        }
 
-        Settings settings = cooldownManager.getSettings();
-        ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(plugin, ListenerPriority.LOWEST, PacketType.Play.Server.SET_COOLDOWN) {
-            List<CooldownType> types = Arrays.asList(CooldownType.CHORUS, CooldownType.ENDER_PEARL);
+        final Settings settings = cooldownManager.getSettings();
+        final Set<CooldownType> monitoredTypes = EnumSet.of(CooldownType.CHORUS, CooldownType.ENDER_PEARL);
 
-            @Override
-            public void onPacketSending(PacketEvent event) {
-                Material material = (Material) getMaterial.invoke(null, event.getPacket().getModifier().withType(ITEM_CLASS).read(0));
-                int duration = event.getPacket().getIntegers().read(0);
-                duration = duration * 50;
+        ProtocolLibrary.getProtocolManager().addPacketListener(
+                new PacketAdapter(plugin, ListenerPriority.LOWEST, PacketType.Play.Server.SET_COOLDOWN) {
+                    @Override
+                    public void onPacketSending(PacketEvent event) {
+                        if (event.isCancelled() || !isAvailable()) {
+                            return;
+                        }
 
-                for (CooldownType cooldownType : types) {
-                    if (material == cooldownType.getMaterial()) {
-                        boolean hasCooldown = cooldownManager.hasCooldown(event.getPlayer(), cooldownType, cooldownType.getCooldown(settings) * 1000);
-                        if (hasCooldown) {
-                            long remaning = cooldownManager.getRemaining(event.getPlayer(), cooldownType, cooldownType.getCooldown(settings) * 1000);
-                            if (Math.abs(remaning - duration) > 100) {
-                                if (!pvPManager.isPvPModeEnabled() || pvPManager.isInPvP(event.getPlayer())) {
-                                    if (duration == 0) {
-                                        event.setCancelled(true);
-                                        return;
+                        try {
+                            Material material = (Material) getMaterialMethod.invoke(
+                                    null, event.getPacket().getModifier().withType(itemClass).read(0)
+                            );
+
+                            int durationTicks = event.getPacket().getIntegers().read(0);
+                            long durationMs = durationTicks * TICK_MS;
+
+                            for (CooldownType cooldownType : monitoredTypes) {
+                                if (material == cooldownType.getMaterial()) {
+                                    long configCooldownMs = TimeUnit.SECONDS.toMillis(cooldownType.getCooldown(settings));
+
+                                    if (cooldownManager.hasCooldown(event.getPlayer(), cooldownType, configCooldownMs)) {
+                                        long remainingMs = cooldownManager.getRemaining(
+                                                event.getPlayer(), cooldownType, configCooldownMs
+                                        );
+
+                                        if (Math.abs(remainingMs - durationMs) > THRESHOLD_MS) {
+                                            boolean shouldModify = !pvpManager.isPvPModeEnabled()
+                                                    || pvpManager.isInPvP(event.getPlayer());
+
+                                            if (shouldModify) {
+                                                if (durationTicks == 0) {
+                                                    event.setCancelled(true);
+                                                    return;
+                                                }
+
+                                                int newDurationTicks = (int) Math.ceil(remainingMs / (float) TICK_MS);
+                                                event.getPacket().getIntegers().write(0, newDurationTicks);
+                                            }
+                                        }
+                                        break;
                                     }
-                                    event.getPacket().getIntegers().write(0, (int) Math.ceil(remaning / 50f));
                                 }
                             }
+                        } catch (Exception e) {
+                            Bukkit.getLogger().warning("[AntiRelog] Ошибка обработки пакета кулдауна: " + e.getMessage());
                         }
                     }
                 }
-            }
-        });
+        );
     }
 }

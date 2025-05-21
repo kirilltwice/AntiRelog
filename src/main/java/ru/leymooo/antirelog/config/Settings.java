@@ -1,10 +1,7 @@
 package ru.leymooo.antirelog.config;
 
-
 import ru.leymooo.annotatedyaml.Annotations.*;
-
 import ru.leymooo.annotatedyaml.Configuration;
-import ru.leymooo.annotatedyaml.ConfigurationProvider;
 
 import java.util.*;
 import java.util.stream.Collectors;

@@ -1,35 +1,39 @@
 package ru.leymooo.antirelog.util;
 
+import lombok.experimental.UtilityClass;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
 
-import java.lang.reflect.Field;
+import java.util.Optional;
 import java.util.logging.Level;
 
+@UtilityClass
 public class CommandMapUtils {
 
+    @Getter
     private static CommandMap commandMap;
-    private static Boolean tried = null;
+    private static boolean initialized = false;
 
-
-    public static CommandMap getCommandMap() {
-        if (commandMap == null && tried == null) {
-            tried = true;
+    public CommandMap getCommandMap() {
+        if (!initialized) {
+            initialized = true;
             try {
-                Field field = Bukkit.getServer().getClass().getDeclaredField("commandMap");
-                field.setAccessible(true);
-                commandMap = (CommandMap) field.get(Bukkit.getServer());
+                commandMap = Bukkit.getServer().getCommandMap();
             } catch (Exception e) {
-                Bukkit.getLogger().log(Level.WARNING, "[AntiRelog] Could not init command map", e);
+                Bukkit.getLogger().log(Level.WARNING, "[AntiRelog] Could not initialize command map", e);
             }
         }
         return commandMap;
     }
 
-    public static Command getCommand(String command) {
-        CommandMap map = getCommandMap();
-        return map == null ? null : getCommandMap().getCommand(command);
+    public Optional<Command> getCommand(String command) {
+        return Optional.ofNullable(getCommandMap())
+                .map(map -> map.getCommand(command));
     }
 
+    public boolean hasCommand(String command) {
+        return getCommand(command).isPresent();
+    }
 }

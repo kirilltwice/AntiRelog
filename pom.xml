@@ -6,17 +6,17 @@
 
     <groupId>ru.leymooo</groupId>
     <artifactId>antirelog</artifactId>
-    <version>3.0.11</version>
+    <version>3.0.12</version>
     <packaging>jar</packaging>
 
     <name>AntiRelog</name>
 
     <description>AntiRelog</description>
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-    <url>http://rubukkit.org/threads/125331/</url>
+    <url>https://github.com/kirilltwice/AntiRelog</url>
 
     <build>
         <defaultGoal>clean package</defaultGoal>
@@ -33,7 +33,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.1.0</version>
+                <version>3.5.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -73,8 +73,8 @@
 
     <repositories>
         <repository>
-            <id>spigotmc-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
+            <id>papermc-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <repository>
             <id>sonatype</id>
@@ -105,7 +105,7 @@
         </repository>
         <repository>
             <id>dmulloy2-repo</id>
-            <url>https://repo.dmulloy2.net/nexus/repository/public/</url>
+            <url>https://repo.dmulloy2.net/repository/public/</url>
         </repository>
         <repository>
             <id>jitpack.io</id>
@@ -115,27 +115,33 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.19.4-R0.1-SNAPSHOT</version>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21.4-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-        <!-- maven repo is dead, do `mvn clean install` your self https://github.com/Leymooo/AnnotatedYAMLConfiguration -->
         <dependency>
-            <groupId>ru.leymooo</groupId>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.38</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Leymooo.AnnotatedYAMLConfiguration</groupId>
             <artifactId>AnnotatedYAMLConfiguration-bukkit</artifactId>
-            <version>1.2-SNAPSHOT</version>
+            <version>2cbe5f9fa3</version>
+            <scope>compile</scope> <!-- Make sure this is compile scope -->
         </dependency>
         <dependency>
             <groupId>net.essentialsx</groupId>
             <artifactId>EssentialsX</artifactId>
-            <version>2.19.0</version>
+            <version>2.21.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.github.LeonMangler</groupId>
             <artifactId>SuperVanish</artifactId>
-            <version>6.2.6-2</version>
+            <version>6.2.18-3</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>  <!-- declare the exclusion here -->
@@ -153,13 +159,13 @@
         <dependency>
             <groupId>org.codemc.worldguardwrapper</groupId>
             <artifactId>worldguardwrapper</artifactId>
-            <version>1.2.0-SNAPSHOT</version>
+            <version>1.2.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>LibsDisguises</groupId>
-            <artifactId>LibsDisguises</artifactId>
-            <version>10.0.26</version>
+            <groupId>me.libraryaddict.disguises</groupId>
+            <artifactId>libsdisguises</artifactId>
+            <version>11.0.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -167,13 +173,12 @@
             <artifactId>CMI</artifactId>
             <version>ANY</version>
             <scope>system</scope>
-            <!--new version of plugin with only required classes to compile-->
-            <systemPath>${project.basedir}/libs/CMI-API9.7.0.1.jar</systemPath>
+            <systemPath>${project.basedir}/libs/CMIAPI-9.7.4.1.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib</artifactId>
-            <version>4.7.1-SNAPSHOT</version>
+            <version>5.3.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

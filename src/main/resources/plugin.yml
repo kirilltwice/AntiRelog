@@ -1,11 +1,23 @@
 name: AntiRelog
-version: ${project.version}
 main: ru.leymooo.antirelog.Antirelog
-api-version: 1.13
+
+authors: [ Twice, Leymooo ]
 prefix: AntiRelog
-softdepend: [Essentials, SuperVanish, PremiumVanish, VanishNoPacket, WorldGuard, LibsDisguises, CMI, ProtocolLib]
-authors: [Leymooo]
-description: AntiRelog
-website: http://rubukkit.org/threads/125331/
+
+version: ${project.version}
+api-version: 1.21
+
+softdepend:
+  - Essentials
+  - SuperVanish
+  - PremiumVanish
+  - VanishNoPacket
+  - WorldGuard
+  - LibsDisguises
+  - CMI
+  - ProtocolLib
+
+website: https://github.com/kirilltwice/AntiRelog
+
 commands:
   antirelog:

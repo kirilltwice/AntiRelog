@@ -1,82 +1,131 @@
 package ru.leymooo.antirelog.util;
 
+import lombok.Getter;
+import lombok.experimental.UtilityClass;
 import org.bukkit.Bukkit;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.slf4j.Logger;
 import ru.leymooo.antirelog.Antirelog;
 
-import java.util.logging.Level;
-import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@UtilityClass
 public class VersionUtils {
 
+    private static final String DEFAULT_VERSION = "1.21.4";
+    private static final Pattern VERSION_PATTERN = Pattern.compile("\\(MC: (\\d)\\.(\\d+)\\.?(\\d+?)?\\)");
+
+    @Getter
     private static int majorVersion;
+
+    @Getter
     private static int minorVersion = 0;
+
     private static boolean minorVersionResolved = false;
+    private static Logger logger;
 
     static {
         detectServerVersion();
     }
 
-    public static int getMajorVersion() {
-        return majorVersion;
-    }
-
-    public static int getMinorVersion() {
-        return minorVersion;
-    }
-
-
-    public static boolean isVersion(int major) {
+    public boolean isVersion(int major) {
         return majorVersion >= major;
     }
 
-    public static boolean isVersion(int major, int minor) {
-        return minorVersionResolved ? majorVersion >= major && minorVersion >= minor : majorVersion >= major;
+    public boolean isVersion(int major, int minor) {
+        if (majorVersion > major) {
+            return true;
+        }
+        return majorVersion == major && (!minorVersionResolved || minorVersion >= minor);
     }
 
-    private static void detectServerVersion() {
-        //на все случаи жизни
+    private void detectServerVersion() {
         try {
-            Pattern versionPattern = Pattern.compile("\\(MC: (\\d)\\.(\\d+)\\.?(\\d+?)?\\)");
-            Matcher matcher = versionPattern.matcher(Bukkit.getVersion());
+            logger = Antirelog.getInstance().getSLF4JLogger();
 
-            matcher.find();
-            MatchResult matchResult = matcher.toMatchResult();
-            majorVersion = Integer.parseInt(matchResult.group(2), 10);
-            if (matchResult.groupCount() >= 3) {
-                minorVersion = Integer.parseInt(matchResult.group(3), 10);
-                minorVersionResolved = true;
+            if (tryParseVersionFromBukkitVersion()) {
+                logDetectedVersion();
+                return;
             }
-            JavaPlugin.getPlugin(Antirelog.class).getLogger().info("Detected version: 1."  + majorVersion + "." + minorVersion);
+
+            if (tryParseVersionFromBukkitVersionString()) {
+                logDetectedVersion();
+                return;
+            }
+
+            if (tryParseVersionFromPackageName()) {
+                logDetectedVersion();
+                return;
+            }
+
+            logger.warn("Не удалось определить версию всеми способами. Устанавливаем {}", DEFAULT_VERSION);
+            String[] defaultVersionParts = DEFAULT_VERSION.split("\\.");
+            majorVersion = Integer.parseInt(defaultVersionParts[1]);
+            minorVersion = Integer.parseInt(defaultVersionParts[2]);
+            minorVersionResolved = true;
+            logDetectedVersion();
+
         } catch (Exception e) {
-            JavaPlugin.getPlugin(Antirelog.class).getLogger().log(Level.WARNING, "Failed to detect MC version, trying another method...");
-            try {
-                String[] split = Bukkit.getBukkitVersion().split("-")[0].split("\\.");
-                majorVersion = Integer.parseInt(split[1]);
-                if (split.length == 3) {
-                    minorVersion = Integer.parseInt(split[2]);
-                    minorVersionResolved = true;
-                }
-                JavaPlugin.getPlugin(Antirelog.class).getLogger().info("Detected version: 1."  + majorVersion + "." + minorVersion);
-            } catch (Exception e2) {
-                JavaPlugin.getPlugin(Antirelog.class).getLogger().log(Level.WARNING, "Failed to detect MC version, trying another method... ");
-                try {
-                    String[] split = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].split("_");
-                    majorVersion = Integer.parseInt(split[1]);
-                    JavaPlugin.getPlugin(Antirelog.class).getLogger().info("Detected version: 1."  + majorVersion + "." + minorVersion);
-                } catch (Exception e3) {
-                    JavaPlugin.getPlugin(Antirelog.class).getLogger().log(Level.WARNING, "Failed to detect MC version, trying another method... Fallback to 1" +
-                            ".8.8.", e);
-                    e2.printStackTrace();
-                    e3.printStackTrace();
-                    majorVersion = 8;
-                    minorVersion = 8;
-                    JavaPlugin.getPlugin(Antirelog.class).getLogger().info("Detected version: 1."  + majorVersion + "." + minorVersion);
-                }
-            }
+            logger.error("Непредвиденная ошибка при определении версии", e);
+            majorVersion = 21;
+            minorVersion = 4;
+            minorVersionResolved = true;
+            logDetectedVersion();
         }
     }
 
+    private boolean tryParseVersionFromBukkitVersion() {
+        try {
+            Matcher matcher = VERSION_PATTERN.matcher(Bukkit.getVersion());
+            if (matcher.find()) {
+                majorVersion = Integer.parseInt(matcher.group(2));
+                if (matcher.groupCount() >= 3 && matcher.group(3) != null) {
+                    minorVersion = Integer.parseInt(matcher.group(3));
+                    minorVersionResolved = true;
+                }
+                return true;
+            }
+        } catch (Exception e) {
+            logger.warn("Не удалось определить версию MC из Bukkit.getVersion()");
+        }
+        return false;
+    }
+
+    private boolean tryParseVersionFromBukkitVersionString() {
+        try {
+            String[] split = Bukkit.getBukkitVersion().split("-")[0].split("\\.");
+            majorVersion = Integer.parseInt(split[1]);
+            if (split.length >= 3) {
+                minorVersion = Integer.parseInt(split[2]);
+                minorVersionResolved = true;
+            }
+            return true;
+        } catch (Exception e) {
+            logger.warn("Не удалось определить версию MC из Bukkit.getBukkitVersion()");
+        }
+        return false;
+    }
+
+    private boolean tryParseVersionFromPackageName() {
+        try {
+            String[] split = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].split("_");
+            majorVersion = Integer.parseInt(split[1]);
+            if (split.length >= 3) {
+                minorVersion = Integer.parseInt(split[2]);
+                minorVersionResolved = true;
+            }
+            return true;
+        } catch (Exception e) {
+            logger.warn("Не удалось определить версию MC из имени пакета");
+        }
+        return false;
+    }
+
+    private void logDetectedVersion() {
+        logger.info("Обнаружена версия: 1.{}.{}", majorVersion, minorVersion);
+    }
+
+    public boolean isPaper21() {
+        return isVersion(21, 4);
+    }
 }
