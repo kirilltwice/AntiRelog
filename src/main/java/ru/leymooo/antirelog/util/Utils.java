@@ -5,18 +5,45 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.ChatColor;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @UtilityClass
 public class Utils {
 
     private static final LegacyComponentSerializer LEGACY_SERIALIZER =
             LegacyComponentSerializer.legacySection();
+    private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
 
     public String color(String message) {
+        if (message == null || message.isEmpty()) {
+            return message;
+        }
+
+        message = translateHexCodes(message);
         return ChatColor.translateAlternateColorCodes('&', message);
     }
 
     public Component colorize(String message) {
+        if (message == null || message.isEmpty()) {
+            return Component.empty();
+        }
+
         return LEGACY_SERIALIZER.deserialize(color(message));
+    }
+
+    private String translateHexCodes(String message) {
+        Matcher matcher = HEX_PATTERN.matcher(message);
+        StringBuilder buffer = new StringBuilder(message.length() + 4 * 8);
+
+        while (matcher.find()) {
+            String group = matcher.group(1);
+            matcher.appendReplacement(buffer, "§x§" + group.charAt(0) + "§" + group.charAt(1) +
+                    "§" + group.charAt(2) + "§" + group.charAt(3) + "§" + group.charAt(4) + "§" + group.charAt(5));
+        }
+
+        matcher.appendTail(buffer);
+        return buffer.toString();
     }
 
     public String formatTimeUnit(String base, String singular, String few, String many, int number) {
