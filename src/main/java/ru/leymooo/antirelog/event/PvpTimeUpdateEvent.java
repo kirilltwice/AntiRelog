@@ -1,59 +1,62 @@
 package ru.leymooo.antirelog.event;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-
+@Getter
 public class PvpTimeUpdateEvent extends Event {
-    private static final HandlerList handlers = new HandlerList();
+
+    private static final HandlerList HANDLERS = new HandlerList();
 
     private final Player player;
-    private final int oldTime, newTime;
+    private final int oldTimeSeconds;
+    private final int newTimeSeconds;
 
-    private Player damagedPlayer;
-    private Player damagedBy;
+    @Setter
+    @Nullable
+    private Player targetPlayer;
 
-    public PvpTimeUpdateEvent(Player player, int oldTime, int newTime) {
+    @Setter
+    @Nullable
+    private Player sourcePlayer;
+
+    public PvpTimeUpdateEvent(@NotNull Player player, int oldTimeSeconds, int newTimeSeconds) {
+        super();
         this.player = player;
-        this.oldTime = oldTime;
-        this.newTime = newTime;
+        this.oldTimeSeconds = oldTimeSeconds;
+        this.newTimeSeconds = newTimeSeconds;
     }
 
-    public Player getPlayer() {
-        return player;
+    @Deprecated
+    public PvpTimeUpdateEvent(boolean isAsync, @NotNull Player player, int oldTimeSeconds, int newTimeSeconds) {
+        super(isAsync);
+        this.player = player;
+        this.oldTimeSeconds = oldTimeSeconds;
+        this.newTimeSeconds = newTimeSeconds;
     }
 
-    public int getOldTime() {
-        return oldTime;
+    public void setTargetPlayer(@Nullable Player targetPlayer) {
+        this.targetPlayer = targetPlayer;
     }
 
-    public int getNewTime() {
-        return newTime;
+    public void setSourcePlayer(@Nullable Player sourcePlayer) {
+        this.sourcePlayer = sourcePlayer;
     }
 
-    public Player getDamagedPlayer() {
-        return damagedPlayer;
-    }
 
-    public void setDamagedPlayer(Player damagedPlayer) {
-        this.damagedPlayer = damagedPlayer;
-    }
-
-    public Player getDamagedBy() {
-        return damagedBy;
-    }
-
-    public void setDamagedBy(Player damagedBy) {
-        this.damagedBy = damagedBy;
-    }
-
+    @NotNull
     @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return HANDLERS;
     }
 
+    @NotNull
     public static HandlerList getHandlerList() {
-        return handlers;
+        return HANDLERS;
     }
 }

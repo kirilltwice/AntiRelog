@@ -1,6 +1,9 @@
 package ru.leymooo.antirelog.manager;
 
 import lombok.Getter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
@@ -18,19 +21,17 @@ import ru.leymooo.antirelog.event.PvpTimeUpdateEvent;
 import ru.leymooo.antirelog.util.ActionBar;
 import ru.leymooo.antirelog.util.CommandMapUtils;
 import ru.leymooo.antirelog.util.Utils;
-import ru.leymooo.antirelog.util.VersionUtils;
 
+import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.Optional;
 
 public class PvPManager {
 
     private final Settings settings;
     private final Antirelog plugin;
 
-    private final Map<Player, Integer> pvpMap = new ConcurrentHashMap<>();
-    private final Map<Player, Integer> silentPvpMap = new ConcurrentHashMap<>();
+    private final Map<Player, Integer> pvpMap = new HashMap<>();
+    private final Map<Player, Integer> silentPvpMap = new HashMap<>();
 
     @Getter
     private final PowerUpsManager powerUpsManager;
@@ -148,8 +149,8 @@ public class PvPManager {
     }
 
     public void playerDamagedByPlayer(Player attacker, Player defender) {
-        if (attacker == null || defender == null || attacker == defender ||
-                attacker.getWorld() != defender.getWorld()) {
+        if (attacker == null || defender == null || attacker.equals(defender) ||
+                !attacker.getWorld().equals(defender.getWorld())) {
             return;
         }
 
@@ -234,9 +235,11 @@ public class PvPManager {
 
     private void startPvp(Player player, boolean bypassed, boolean attacker) {
         if (!bypassed) {
-            String message = Utils.color(settings.getMessages().getPvpStarted());
+            String message = settings.getMessages().getPvpStarted();
             if (!message.isEmpty()) {
-                player.sendMessage(message);
+                String coloredMessage = Utils.color(message);
+                Component component = LegacyComponentSerializer.legacySection().deserialize(coloredMessage);
+                player.sendMessage(component);
             }
 
             if (attacker && settings.isDisablePowerups()) {
@@ -260,7 +263,8 @@ public class PvPManager {
 
             String actionBar = settings.getMessages().getInPvpActionbar();
             if (!actionBar.isEmpty()) {
-                sendActionBar(player, Utils.color(Utils.replaceTime(actionBar, newTime)));
+                String formattedActionBar = Utils.color(Utils.replaceTime(actionBar, newTime));
+                sendActionBar(player, formattedActionBar);
             }
 
             if (settings.isDisablePowerups()) {
@@ -280,7 +284,6 @@ public class PvPManager {
         updatePvpMode(attacker, bypassed, settings.getPvpTime());
 
         PvpTimeUpdateEvent pvpTimeUpdateEvent = new PvpTimeUpdateEvent(attacker, oldTime, settings.getPvpTime());
-        pvpTimeUpdateEvent.setDamagedPlayer(defender);
         Bukkit.getPluginManager().callEvent(pvpTimeUpdateEvent);
     }
 
@@ -289,9 +292,9 @@ public class PvPManager {
         updatePvpMode(defender, bypassed, settings.getPvpTime());
 
         PvpTimeUpdateEvent pvpTimeUpdateEvent = new PvpTimeUpdateEvent(defender, oldTime, settings.getPvpTime());
-        pvpTimeUpdateEvent.setDamagedBy(attackedBy);
         Bukkit.getPluginManager().callEvent(pvpTimeUpdateEvent);
     }
+
     private void callUpdateEvent(Player player, int oldTime, int newTime) {
         PvpTimeUpdateEvent pvpTimeUpdateEvent = new PvpTimeUpdateEvent(player, oldTime, newTime);
         Bukkit.getPluginManager().callEvent(pvpTimeUpdateEvent);
@@ -306,14 +309,17 @@ public class PvPManager {
 
         sendTitles(player, false);
 
-        String message = Utils.color(settings.getMessages().getPvpStopped());
+        String message = settings.getMessages().getPvpStopped();
         if (!message.isEmpty()) {
-            player.sendMessage(message);
+            String coloredMessage = Utils.color(message);
+            Component component = LegacyComponentSerializer.legacySection().deserialize(coloredMessage);
+            player.sendMessage(component);
         }
 
         String actionBar = settings.getMessages().getPvpStoppedActionbar();
         if (!actionBar.isEmpty()) {
-            sendActionBar(player, Utils.color(actionBar));
+            String coloredActionBar = Utils.color(actionBar);
+            sendActionBar(player, coloredActionBar);
         }
     }
 
@@ -337,26 +343,27 @@ public class PvPManager {
     }
 
     private void sendTitles(Player player, boolean isPvpStarted) {
-        String title = isPvpStarted ?
+        String titleText = isPvpStarted ?
                 settings.getMessages().getPvpStartedTitle() :
                 settings.getMessages().getPvpStoppedTitle();
 
-        String subtitle = isPvpStarted ?
+        String subtitleText = isPvpStarted ?
                 settings.getMessages().getPvpStartedSubtitle() :
                 settings.getMessages().getPvpStoppedSubtitle();
 
-        title = title.isEmpty() ? null : Utils.color(title);
-        subtitle = subtitle.isEmpty() ? null : Utils.color(subtitle);
-
-        if (title == null && subtitle == null) {
+        if (titleText.isEmpty() && subtitleText.isEmpty()) {
             return;
         }
 
-        if (VersionUtils.isVersion(11)) {
-            player.sendTitle(title, subtitle, 10, 30, 10);
-        } else {
-            player.sendTitle(title, subtitle);
-        }
+        Component title = titleText.isEmpty() ? Component.empty() :
+                LegacyComponentSerializer.legacySection().deserialize(Utils.color(titleText));
+        Component subtitle = subtitleText.isEmpty() ? Component.empty() :
+                LegacyComponentSerializer.legacySection().deserialize(Utils.color(subtitleText));
+
+        Title titleObj = Title.title(title, subtitle,
+                Title.Times.times(Duration.ofMillis(500), Duration.ofMillis(1500), Duration.ofMillis(500)));
+
+        player.showTitle(titleObj);
     }
 
     private void sendActionBar(Player player, String message) {

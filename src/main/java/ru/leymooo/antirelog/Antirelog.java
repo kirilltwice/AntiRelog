@@ -30,7 +30,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.stream.Stream;
-import ru.leymooo.antirelog.util.VersionUtils;
 
 public class Antirelog extends JavaPlugin {
     private Settings settings;
@@ -46,10 +45,24 @@ public class Antirelog extends JavaPlugin {
         detectPlugins();
         cooldownManager = new CooldownManager(this, settings);
         if (protocolLib) {
-            ProtocolLibUtils.createListener(cooldownManager, pvpManager, this);
+            try {
+                ProtocolLibUtils.createListener(cooldownManager, pvpManager, this);
+            } catch (Exception e) {
+                protocolLib = false;
+            }
         }
         getServer().getPluginManager().registerEvents(new PvPListener(this, pvpManager, settings), this);
         getServer().getPluginManager().registerEvents(new CooldownListener(this, cooldownManager, pvpManager, settings), this);
+    }
+
+    @Override
+    public void onDisable() {
+        if (pvpManager != null) {
+            pvpManager.onPluginDisable();
+        }
+        if (cooldownManager != null) {
+            cooldownManager.shutdown();
+        }
     }
 
     @Override
@@ -70,7 +83,6 @@ public class Antirelog extends JavaPlugin {
         ConfigurationProvider provider = settings.getConfigurationProvider();
         provider.reloadFileFromDisk();
         File file = provider.getConfigFile();
-        //rename old config
         if (file.exists() && provider.get("config-version") == null) {
             try {
                 Files.move(file.toPath(), new File(file.getParentFile(), "config.old." + System.nanoTime()).toPath(),
@@ -81,7 +93,6 @@ public class Antirelog extends JavaPlugin {
             provider.reloadFileFromDisk();
         }
         if (!file.exists()) {
-            //create new file
             settings.save();
             settings.loaded();
             getLogger().info("config.yml успешно создан");
@@ -101,31 +112,24 @@ public class Antirelog extends JavaPlugin {
         }
     }
 
-
     private void fixFolder() {
         File oldFolder = new File(getDataFolder().getParentFile(), "Antirelog");
         if (!oldFolder.exists()) {
             return;
         }
 
-
         try {
-
             File actualFolder = oldFolder.getCanonicalFile();
-            //Check if folder name is Antirelog
             if (actualFolder.getName().equals("Antirelog")) {
                 File oldConfig = new File(actualFolder, "config.yml");
                 if (!oldConfig.exists()) {
                     deleteFolder(actualFolder.toPath());
                     return;
                 }
-                //save old config
                 List<String> oldConfigLines = Files.readAllLines(oldConfig.toPath(), StandardCharsets.UTF_8);
                 String firstLine = oldConfigLines.size() > 0 ? oldConfigLines.get(0) : null;
-                //delete old folder
                 deleteFolder(actualFolder.toPath());
 
-                //create new folder if needed
                 File newFolder = getDataFolder();
                 if (!newFolder.exists()) {
                     newFolder.mkdir();
@@ -134,15 +138,12 @@ public class Antirelog extends JavaPlugin {
 
                 if (firstLine != null && firstLine.startsWith("config-version")) {
                     if (oldConfigInNewFolder.exists()) {
-                        //save old config
                         Files.move(oldConfigInNewFolder.toPath(), new File(oldConfigInNewFolder.getParentFile(),
                                 "config.old." + System.nanoTime()).toPath());
                     }
-                    //write old config from Antirelog folder to AntiRelog folder
                     Files.write(oldConfigInNewFolder.toPath(), oldConfigLines, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
                     getLogger().log(Level.WARNING, "Old config.yml file from folder 'Antirelog' was moved to 'AntiRelog' folder");
                 } else {
-                    //Olny write old config to different file
                     Files.write(new File(oldConfigInNewFolder.getParentFile(), "config.old." + System.nanoTime()).toPath(),
                             oldConfigLines, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
                     getLogger().log(Level.WARNING, "Old config.yml file from folder 'Antirelog' was moved to 'AntiRelog' folder with " +
@@ -168,9 +169,16 @@ public class Antirelog extends JavaPlugin {
             settings.load();
         }
         getServer().getScheduler().cancelTasks(this);
-        pvpManager.onPluginDisable();
-        pvpManager.onPluginEnable();
-        cooldownManager.clearAll();
+        if (pvpManager != null) {
+            pvpManager.onPluginDisable();
+            pvpManager.onPluginEnable();
+        }
+        if (cooldownManager != null) {
+            cooldownManager.clearAll();
+        }
+        if (pvpManager != null && pvpManager.getBossbarManager() != null) {
+            pvpManager.getBossbarManager().createBossBars();
+        }
     }
 
     public boolean isProtocolLibEnabled() {
@@ -191,8 +199,9 @@ public class Antirelog extends JavaPlugin {
             Class.forName("net.ess3.api.events.teleport.PreTeleportEvent");
             Bukkit.getPluginManager().registerEvents(new EssentialsTeleportListener(pvpManager, settings), this);
         } catch (ClassNotFoundException e) {
+
         }
-        protocolLib = Bukkit.getPluginManager().isPluginEnabled("ProtocolLib") && VersionUtils.isVersion(9);
+        protocolLib = Bukkit.getPluginManager().isPluginEnabled("ProtocolLib");
     }
 
     public Settings getSettings() {

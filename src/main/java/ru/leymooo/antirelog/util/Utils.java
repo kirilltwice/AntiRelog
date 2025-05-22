@@ -1,88 +1,75 @@
 package ru.leymooo.antirelog.util;
 
 import lombok.experimental.UtilityClass;
-import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.concurrent.CompletableFuture;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.ChatColor;
 
 @UtilityClass
 public class Utils {
 
-    private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
-    private static final boolean SUPPORTS_HEX = checkHexSupport();
-
-    public String formatTimeUnit(String ed, String a, String b, String c, int n) {
-        n = Math.abs(n);
-
-        int lastTwoDigits = n % 100;
-        if (lastTwoDigits > 10 && lastTwoDigits < 21) {
-            return ed + c;
-        }
-
-        int lastDigit = n % 10;
-        if (lastDigit == 1) {
-            return ed + a;
-        } else if (lastDigit >= 2 && lastDigit <= 4) {
-            return ed + b;
-        } else {
-            return ed + c;
-        }
-    }
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER =
+            LegacyComponentSerializer.legacySection();
 
     public String color(String message) {
-        if (message == null || message.isEmpty()) {
-            return "";
-        }
-
-        String colored = org.bukkit.ChatColor.translateAlternateColorCodes('&', message);
-
-        return SUPPORTS_HEX ? translateHexColors(colored) : colored;
+        return ChatColor.translateAlternateColorCodes('&', message);
     }
 
-    public CompletableFuture<String> colorAsync(String message) {
-        return CompletableFuture.supplyAsync(() -> color(message));
+    public Component colorize(String message) {
+        return LEGACY_SERIALIZER.deserialize(color(message));
     }
 
-    public String replaceTime(String message, int time) {
-        if (message == null || message.isEmpty()) {
-            return "";
+    public String formatTimeUnit(String base, String singular, String few, String many, int number) {
+        int absNumber = Math.abs(number);
+        int lastTwoDigits = absNumber % 100;
+        int lastDigit = absNumber % 10;
+
+        if (lastTwoDigits >= 11 && lastTwoDigits <= 14) {
+            return base + many;
         }
 
-        return message
-                .replace("%time%", Integer.toString(time))
-                .replace("%formated-sec%", formatTimeUnit("секунд", "у", "ы", "", time));
+        return base + switch (lastDigit) {
+            case 1 -> singular;
+            case 2, 3, 4 -> few;
+            default -> many;
+        };
     }
 
-    private String translateHexColors(String message) {
-        if (!message.contains("&#")) {
-            return message;
-        }
+    public String replaceTime(String message, int timeInSeconds) {
+        String timeString = String.valueOf(timeInSeconds);
+        String formattedSeconds = formatTimeUnit("секунд", "у", "ы", "", timeInSeconds);
 
-        Matcher matcher = HEX_PATTERN.matcher(message);
-        StringBuffer buffer = new StringBuffer(message.length() + 4 * 8);
-
-        while (matcher.find()) {
-            String hexColor = "#" + matcher.group(1);
-            try {
-                ChatColor color = ChatColor.of(hexColor);
-                matcher.appendReplacement(buffer, color.toString());
-            } catch (Exception e) {
-                matcher.appendReplacement(buffer, "");
-            }
-        }
-
-        return matcher.appendTail(buffer).toString();
+        return message.replace("%time%", timeString)
+                .replace("%formated-sec%", formattedSeconds);
     }
 
-    private boolean checkHexSupport() {
-        try {
-            String version = Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
-            int majorVersion = Integer.parseInt(version.split("_")[1]);
-            return majorVersion >= 16;
-        } catch (Exception e) {
-            return false;
+    public Component replaceTimeComponent(String message, int timeInSeconds) {
+        String replacedMessage = replaceTime(message, timeInSeconds);
+        return colorize(replacedMessage);
+    }
+
+    public String formatDuration(int seconds) {
+        if (seconds < 60) {
+            return seconds + formatTimeUnit(" секунд", "у", "ы", "", seconds);
         }
+
+        int minutes = seconds / 60;
+        int remainingSeconds = seconds % 60;
+
+        StringBuilder result = new StringBuilder();
+        result.append(minutes)
+                .append(formatTimeUnit(" минут", "у", "ы", "", minutes));
+
+        if (remainingSeconds > 0) {
+            result.append(" ")
+                    .append(remainingSeconds)
+                    .append(formatTimeUnit(" секунд", "у", "ы", "", remainingSeconds));
+        }
+
+        return result.toString();
+    }
+
+    public Component formatDurationComponent(int seconds) {
+        return colorize(formatDuration(seconds));
     }
 }

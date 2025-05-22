@@ -1,24 +1,22 @@
 package ru.leymooo.antirelog.listeners;
 
+import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.codemc.worldguardwrapper.event.WrappedDisallowedPVPEvent;
 import ru.leymooo.antirelog.config.Settings;
 import ru.leymooo.antirelog.manager.PvPManager;
 
+@RequiredArgsConstructor
 public class WorldGuardListener implements Listener {
 
     private final Settings settings;
     private final PvPManager pvpManager;
 
-    public WorldGuardListener(Settings settings, PvPManager pvpManager) {
-        this.settings = settings;
-        this.pvpManager = pvpManager;
-    }
-
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     public void onPvP(WrappedDisallowedPVPEvent event) {
         if (!pvpManager.isPvPModeEnabled() || !settings.isIgnoreWorldGuard()) {
             return;
@@ -27,15 +25,21 @@ public class WorldGuardListener implements Listener {
         Player attacker = event.getAttacker();
         Player defender = event.getDefender();
 
-        boolean attackerInPvp = pvpManager.isInPvP(attacker) || pvpManager.isInSilentPvP(attacker);
-        boolean defenderInPvp = pvpManager.isInPvP(defender) || pvpManager.isInSilentPvP(defender);
+        boolean attackerInPvp = isPlayerInAnyPvP(attacker);
+        boolean defenderInPvp = isPlayerInAnyPvP(defender);
 
-        if (attackerInPvp && defenderInPvp) {
+        if (shouldCancelEvent(attackerInPvp, defenderInPvp)) {
             event.setCancelled(true);
-            event.setResult(Result.DENY); //Deny means cancelled means pvp allowed
-        } else if (settings.isJoinPvPInWorldGuard() && defenderInPvp) {
-            event.setCancelled(true);
-            event.setResult(Result.DENY); //Deny means cancelled means pvp allowed
+            event.setResult(Result.DENY);
         }
+    }
+
+    private boolean isPlayerInAnyPvP(Player player) {
+        return pvpManager.isInPvP(player) || pvpManager.isInSilentPvP(player);
+    }
+
+    private boolean shouldCancelEvent(boolean attackerInPvp, boolean defenderInPvp) {
+        return (attackerInPvp && defenderInPvp) ||
+                (settings.isJoinPvPInWorldGuard() && defenderInPvp);
     }
 }

@@ -1,60 +1,54 @@
 package ru.leymooo.antirelog.event;
 
+import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 
+@Getter
 public class PvpPreStartEvent extends Event implements Cancellable {
 
-    private static final HandlerList handlers = new HandlerList();
+    private static final HandlerList HANDLERS = new HandlerList();
 
     private final Player defender;
     private final Player attacker;
-    private final int pvpTime;
+    private final int pvpTimeSeconds;
     private final PvPStatus pvpStatus;
+
+    @Setter
     private boolean cancelled;
 
-    public PvpPreStartEvent(Player defender, Player attacker, int pvpTime, PvPStatus pvpStatus) {
+    public PvpPreStartEvent(@NotNull Player defender, @NotNull Player attacker, int pvpTimeSeconds, @NotNull PvPStatus pvpStatus) {
+        super();
         this.defender = defender;
         this.attacker = attacker;
-        this.pvpTime = pvpTime;
+        this.pvpTimeSeconds = pvpTimeSeconds;
         this.pvpStatus = pvpStatus;
+        this.cancelled = false;
     }
 
-    public Player getDefender() {
-        return defender;
+    @Deprecated
+    public PvpPreStartEvent(boolean isAsync, @NotNull Player defender, @NotNull Player attacker, int pvpTimeSeconds, @NotNull PvPStatus pvpStatus) {
+        super(isAsync);
+        this.defender = defender;
+        this.attacker = attacker;
+        this.pvpTimeSeconds = pvpTimeSeconds;
+        this.pvpStatus = pvpStatus;
+        this.cancelled = false;
     }
 
-    public Player getAttacker() {
-        return attacker;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return cancelled;
-    }
-
-    @Override
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
-    }
-
-    public int getPvpTime() {
-        return pvpTime;
-    }
-
-    public PvPStatus getPvpStatus() {
-        return pvpStatus;
-    }
-
+    @NotNull
     @Override
     public HandlerList getHandlers() {
-        return handlers;
+        return HANDLERS;
     }
 
+    @NotNull
     public static HandlerList getHandlerList() {
-        return handlers;
+        return HANDLERS;
     }
 
     public enum PvPStatus {
