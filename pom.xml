@@ -15,6 +15,7 @@
     <properties>
         <java.version>21</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <relocation-root.package>ru.leymooo.antirelog.libs</relocation-root.package>
     </properties>
     <url>https://github.com/kirilltwice/AntiRelog</url>
 
@@ -45,11 +46,11 @@
                             <relocations>
                                 <relocation>
                                     <pattern>org.codemc.worldguardwrapper</pattern>
-                                    <shadedPattern>ru.leymooo.antirelog.libs.worldguardwrapper</shadedPattern>
+                                    <shadedPattern>${relocation-root.package}.ru.leymooo.antirelog.libs.worldguardwrapper</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>ru.leymooo.annotatedyaml</pattern>
-                                    <shadedPattern>ru.leymooo.antirelog.libs.annotatedyaml</shadedPattern>
+                                    <shadedPattern>${relocation-root.package}.ru.leymooo.antirelog.libs.annotatedyaml</shadedPattern>
                                 </relocation>
                             </relocations>
                         </configuration>
@@ -61,12 +62,6 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
-            </resource>
-            <resource>
-                <directory>src/main/java</directory>
-                <includes>
-                    <include>**/*.java</include>
-                </includes>
             </resource>
         </resources>
     </build>
@@ -143,12 +138,6 @@
             <artifactId>SuperVanish</artifactId>
             <version>6.2.18-3</version>
             <scope>provided</scope>
-            <exclusions>
-                <exclusion>  <!-- declare the exclusion here -->
-                    <groupId>*</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.kitteh</groupId>
