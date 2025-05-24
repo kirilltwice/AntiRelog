@@ -169,6 +169,38 @@ public class PvPManager {
         tryStartPvP(attacker, defender);
     }
 
+    public void forceStartPvP(Player player) {
+        if (player == null || !player.isOnline()) {
+            return;
+        }
+
+        if (isInPvP(player) || isInSilentPvP(player)) {
+            return;
+        }
+
+        boolean bypassed = isHasBypassPermission(player);
+
+        if (!bypassed) {
+            String message = settings.getMessages().getPvpStarted();
+            if (!message.isEmpty()) {
+                String coloredMessage = Utils.color(message);
+                Component component = LegacyComponentSerializer.legacySection().deserialize(coloredMessage);
+                player.sendMessage(component);
+            }
+
+            if (settings.isDisablePowerups()) {
+                powerUpsManager.disablePowerUpsWithRunCommands(player);
+            }
+
+            sendTitles(player, true);
+        }
+
+        updatePvpMode(player, bypassed, settings.getPvpTime());
+        player.setNoDamageTicks(0);
+
+        Bukkit.getPluginManager().callEvent(new PvpStartedEvent(player, player, settings.getPvpTime(), PvPStatus.ALL_NOT_IN_PVP));
+    }
+
     private void tryStartPvP(Player attacker, Player defender) {
         if (isInIgnoredWorld(attacker) || isInIgnoredRegion(attacker) || isInIgnoredRegion(defender)) {
             return;

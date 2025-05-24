@@ -17,6 +17,7 @@ import ru.leymooo.antirelog.manager.BossbarManager;
 import ru.leymooo.antirelog.manager.CooldownManager;
 import ru.leymooo.antirelog.manager.PowerUpsManager;
 import ru.leymooo.antirelog.manager.PvPManager;
+import ru.leymooo.antirelog.command.AntiRelogCommand;
 import ru.leymooo.antirelog.util.ProtocolLibUtils;
 
 import java.io.File;
@@ -53,6 +54,10 @@ public class Antirelog extends JavaPlugin {
         }
         getServer().getPluginManager().registerEvents(new PvPListener(this, pvpManager, settings), this);
         getServer().getPluginManager().registerEvents(new CooldownListener(this, cooldownManager, pvpManager, settings), this);
+
+        AntiRelogCommand commandHandler = new AntiRelogCommand(this, pvpManager);
+        getCommand("antirelog").setExecutor(commandHandler);
+        getCommand("antirelog").setTabCompleter(commandHandler);
     }
 
     @Override
@@ -67,12 +72,7 @@ public class Antirelog extends JavaPlugin {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length > 0 && args[0].equalsIgnoreCase("reload") && sender.hasPermission("antirelog.reload")) {
-            reloadSettings();
-            sender.sendMessage("§aReloaded");
-            getLogger().info(settings.toString());
-        }
-        return true;
+        return false;
     }
 
     private void loadConfig() {
