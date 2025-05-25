@@ -6,18 +6,21 @@
 
     <groupId>ru.leymooo</groupId>
     <artifactId>antirelog</artifactId>
-    <version>3.0.12</version>
+    <version>3.0.13</version>
     <packaging>jar</packaging>
 
     <name>AntiRelog</name>
-
     <description>AntiRelog</description>
+    <url>https://github.com/kirilltwice/AntiRelog</url>
+
     <properties>
         <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <relocation-root.package>ru.leymooo.antirelog.libs</relocation-root.package>
     </properties>
-    <url>https://github.com/kirilltwice/AntiRelog</url>
 
     <build>
         <defaultGoal>clean package</defaultGoal>
@@ -25,16 +28,21 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.7.0</version>
+                <version>3.13.0</version>
                 <configuration>
                     <source>${java.version}</source>
                     <target>${java.version}</target>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <compilerArgs>
+                        <arg>-Xlint:all</arg>
+                        <arg>-Awarns</arg>
+                    </compilerArgs>
                 </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.1</version>
+                <version>3.6.0</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -43,19 +51,38 @@
                         </goals>
                         <configuration>
                             <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <minimizeJar>false</minimizeJar>
                             <relocations>
                                 <relocation>
                                     <pattern>org.codemc.worldguardwrapper</pattern>
-                                    <shadedPattern>${relocation-root.package}.ru.leymooo.antirelog.libs.worldguardwrapper</shadedPattern>
+                                    <shadedPattern>${relocation-root.package}.worldguardwrapper</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>ru.leymooo.annotatedyaml</pattern>
-                                    <shadedPattern>${relocation-root.package}.ru.leymooo.antirelog.libs.annotatedyaml</shadedPattern>
+                                    <shadedPattern>${relocation-root.package}.annotatedyaml</shadedPattern>
                                 </relocation>
                             </relocations>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <exclude>META-INF/*.SF</exclude>
+                                        <exclude>META-INF/*.DSA</exclude>
+                                        <exclude>META-INF/*.RSA</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.3.1</version>
+                <configuration>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                </configuration>
             </plugin>
         </plugins>
         <resources>
@@ -83,17 +110,10 @@
             <id>codemc-repo</id>
             <url>https://repo.codemc.org/repository/maven-public/</url>
         </repository>
-        <!-- supervanish-->
         <repository>
             <id>cubekrowd-repo</id>
-            <url>https://mavenrepo.cubekrowd.net/atifactory/repo/</url>
+            <url>https://mavenrepo.cubekrowd.net/repository/public/</url>
         </repository>
-        <!-- vanishnopacket-->
-        <repository>
-            <id>kitteh-repo</id>
-            <url>https://repo.minebench.de/</url>
-        </repository>
-        <!--libsdisguises-->
         <repository>
             <id>md_5-public</id>
             <url>https://repo.md-5.net/content/groups/public/</url>
@@ -118,14 +138,20 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.38</version>
+            <version>1.18.36</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>com.github.Leymooo.AnnotatedYAMLConfiguration</groupId>
-            <artifactId>AnnotatedYAMLConfiguration-bukkit</artifactId>
+            <groupId>com.github.Leymooo</groupId>
+            <artifactId>AnnotatedYAMLConfiguration</artifactId>
             <version>2cbe5f9fa3</version>
-            <scope>compile</scope> <!-- Make sure this is compile scope -->
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.codemc.worldguardwrapper</groupId>
+            <artifactId>worldguardwrapper</artifactId>
+            <version>1.2.1-SNAPSHOT</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>net.essentialsx</groupId>
@@ -136,20 +162,8 @@
         <dependency>
             <groupId>com.github.LeonMangler</groupId>
             <artifactId>SuperVanish</artifactId>
-            <version>6.2.18-3</version>
+            <version>6.2.19</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.kitteh</groupId>
-            <artifactId>VanishNoPacket</artifactId>
-            <version>3.20</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.codemc.worldguardwrapper</groupId>
-            <artifactId>worldguardwrapper</artifactId>
-            <version>1.2.1-SNAPSHOT</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>me.libraryaddict.disguises</groupId>
