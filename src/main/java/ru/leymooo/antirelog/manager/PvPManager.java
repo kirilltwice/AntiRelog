@@ -1,44 +1,45 @@
 package ru.leymooo.antirelog.manager;
 
-import lombok.Getter;
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.Title.Times;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.command.Command;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
-import org.codemc.worldguardwrapper.WorldGuardWrapper;
-import org.codemc.worldguardwrapper.region.IWrappedRegion;
 import ru.leymooo.antirelog.Antirelog;
 import ru.leymooo.antirelog.config.Settings;
 import ru.leymooo.antirelog.event.PvpPreStartEvent;
-import ru.leymooo.antirelog.event.PvpPreStartEvent.PvPStatus;
 import ru.leymooo.antirelog.event.PvpStartedEvent;
 import ru.leymooo.antirelog.event.PvpStoppedEvent;
 import ru.leymooo.antirelog.event.PvpTimeUpdateEvent;
+import ru.leymooo.antirelog.event.PvpPreStartEvent.PvPStatus;
+import org.codemc.worldguardwrapper.WorldGuardWrapper;
+import org.codemc.worldguardwrapper.region.IWrappedRegion;
 import ru.leymooo.antirelog.util.ActionBar;
 import ru.leymooo.antirelog.util.CommandMapUtils;
 import ru.leymooo.antirelog.util.Utils;
 
-import java.time.Duration;
-import java.util.*;
-
 public class PvPManager {
-
     private final Settings settings;
     private final Antirelog plugin;
-
     private final Map<Player, Integer> pvpMap = new HashMap<>();
     private final Map<Player, Integer> silentPvpMap = new HashMap<>();
-
-    @Getter
     private final PowerUpsManager powerUpsManager;
-
-    @Getter
     private final BossbarManager bossbarManager;
-
     private final Set<String> whiteListedCommands = new HashSet<>();
     private BukkitTask pvpTimerTask;
 
@@ -47,59 +48,52 @@ public class PvPManager {
         this.plugin = plugin;
         this.powerUpsManager = new PowerUpsManager(settings);
         this.bossbarManager = new BossbarManager(settings);
-        onPluginEnable();
+        this.onPluginEnable();
     }
 
     public void onPluginDisable() {
-        if (pvpTimerTask != null) {
-            pvpTimerTask.cancel();
-            pvpTimerTask = null;
+        if (this.pvpTimerTask != null) {
+            this.pvpTimerTask.cancel();
+            this.pvpTimerTask = null;
         }
-
-        pvpMap.clear();
-        silentPvpMap.clear();
-        bossbarManager.clearBossbars();
+        this.pvpMap.clear();
+        this.silentPvpMap.clear();
+        this.bossbarManager.clearBossbars();
     }
 
     public void onPluginEnable() {
-        loadWhitelistedCommands();
-        startPvpTimer();
-        bossbarManager.createBossBars();
+        this.loadWhitelistedCommands();
+        this.startPvpTimer();
+        this.bossbarManager.createBossBars();
     }
 
     private void loadWhitelistedCommands() {
-        whiteListedCommands.clear();
-
-        if (!settings.isDisableCommandsInPvp() || settings.getWhiteListedCommands().isEmpty()) {
+        this.whiteListedCommands.clear();
+        if (!this.settings.isDisableCommandsInPvp() || this.settings.getWhiteListedCommands().isEmpty()) {
             return;
         }
 
-        for (String commandName : settings.getWhiteListedCommands()) {
+        for (String commandName : this.settings.getWhiteListedCommands()) {
             String lowerCaseName = commandName.toLowerCase();
-            whiteListedCommands.add(lowerCaseName);
-
+            this.whiteListedCommands.add(lowerCaseName);
             Optional<Command> commandOptional = CommandMapUtils.getCommand(commandName);
             commandOptional.ifPresent(command -> {
-                whiteListedCommands.add(command.getName().toLowerCase());
-                command.getAliases().forEach(alias ->
-                        whiteListedCommands.add(alias.toLowerCase())
-                );
+                this.whiteListedCommands.add(command.getName().toLowerCase());
+                command.getAliases().forEach(alias -> this.whiteListedCommands.add(alias.toLowerCase()));
             });
         }
     }
 
     private void startPvpTimer() {
-        if (pvpTimerTask != null) {
-            pvpTimerTask.cancel();
+        if (this.pvpTimerTask != null) {
+            this.pvpTimerTask.cancel();
         }
 
-        pvpTimerTask = plugin.getServer().getScheduler().runTaskTimer(plugin, () -> {
-            if (pvpMap.isEmpty() && silentPvpMap.isEmpty()) {
-                return;
+        this.pvpTimerTask = this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> {
+            if (!this.pvpMap.isEmpty() || !this.silentPvpMap.isEmpty()) {
+                this.updatePvpTimers(this.pvpMap, false);
+                this.updatePvpTimers(this.silentPvpMap, true);
             }
-
-            updatePvpTimers(pvpMap, false);
-            updatePvpTimers(silentPvpMap, true);
         }, 20L, 20L);
     }
 
@@ -113,217 +107,188 @@ public class PvPManager {
         for (Player player : playersInPvp) {
             if (!player.isOnline()) {
                 map.remove(player);
+                if (!bypassed) {
+                    bossbarManager.clearBossbar(player);
+                }
                 continue;
             }
 
-            int currentTime = bypassed ? getTimeRemainingInPvPSilent(player) : getTimeRemainingInPvP(player);
+            int currentTime = bypassed ? this.getTimeRemainingInPvPSilent(player) : this.getTimeRemainingInPvP(player);
             int timeRemaining = currentTime - 1;
 
-            if (timeRemaining <= 0 || (settings.isDisablePvpInIgnoredRegion() && isInIgnoredRegion(player))) {
+            if (timeRemaining <= 0 || (this.settings.isDisablePvpInIgnoredRegion() && this.isInIgnoredRegion(player))) {
                 if (bypassed) {
-                    stopPvPSilent(player);
+                    this.stopPvPSilent(player);
                 } else {
-                    stopPvP(player);
+                    this.stopPvP(player);
                 }
             } else {
-                updatePvpMode(player, bypassed, timeRemaining);
-                callUpdateEvent(player, currentTime, timeRemaining);
+                this.updatePvpMode(player, bypassed, timeRemaining);
+                this.callUpdateEvent(player, currentTime, timeRemaining);
             }
         }
     }
 
     public boolean isInPvP(Player player) {
-        return player != null && pvpMap.containsKey(player);
+        return player != null && this.pvpMap.containsKey(player);
     }
 
     public boolean isInSilentPvP(Player player) {
-        return player != null && silentPvpMap.containsKey(player);
+        return player != null && this.silentPvpMap.containsKey(player);
     }
 
     public int getTimeRemainingInPvP(Player player) {
-        return player != null ? pvpMap.getOrDefault(player, 0) : 0;
+        return player != null ? this.pvpMap.getOrDefault(player, 0) : 0;
     }
 
     public int getTimeRemainingInPvPSilent(Player player) {
-        return player != null ? silentPvpMap.getOrDefault(player, 0) : 0;
+        return player != null ? this.silentPvpMap.getOrDefault(player, 0) : 0;
     }
 
     public void playerDamagedByPlayer(Player attacker, Player defender) {
-        if (attacker == null || defender == null || attacker.equals(defender) ||
-                !attacker.getWorld().equals(defender.getWorld())) {
+        if (attacker == null || defender == null || attacker.equals(defender) || !attacker.getWorld().equals(defender.getWorld())) {
             return;
         }
-
-        if (defender.getGameMode() == GameMode.CREATIVE) {
+        if (defender.getGameMode() == GameMode.CREATIVE || attacker.hasMetadata("NPC") || defender.hasMetadata("NPC")) {
             return;
         }
-
-        if (attacker.hasMetadata("NPC") || defender.hasMetadata("NPC")) {
-            return;
-        }
-
         if (defender.isDead() || attacker.isDead()) {
             return;
         }
-
-        tryStartPvP(attacker, defender);
+        this.tryStartPvP(attacker, defender);
     }
 
     public void forceStartPvP(Player player) {
-        if (player == null || !player.isOnline()) {
+        if (player == null || !player.isOnline() || this.isInPvP(player) || this.isInSilentPvP(player)) {
             return;
         }
 
-        if (isInPvP(player) || isInSilentPvP(player)) {
-            return;
-        }
-
-        boolean bypassed = isHasBypassPermission(player);
-
+        boolean bypassed = this.isHasBypassPermission(player);
         if (!bypassed) {
-            String message = settings.getMessages().getPvpStarted();
-            if (!message.isEmpty()) {
-                String coloredMessage = Utils.color(message);
-                Component component = LegacyComponentSerializer.legacySection().deserialize(coloredMessage);
+            String message = this.settings.getMessages().getPvpStarted();
+            if (message != null && !message.isEmpty()) {
+                Component component = LegacyComponentSerializer.legacySection().deserialize(Utils.color(message));
                 player.sendMessage(component);
             }
 
-            if (settings.isDisablePowerups()) {
-                powerUpsManager.disablePowerUpsWithRunCommands(player);
+            if (this.settings.isDisablePowerups()) {
+                this.powerUpsManager.disablePowerUpsWithRunCommands(player);
             }
-
-            sendTitles(player, true);
+            this.sendTitles(player, true);
         }
 
-        updatePvpMode(player, bypassed, settings.getPvpTime());
+        this.updatePvpMode(player, bypassed, this.settings.getPvpTime());
         player.setNoDamageTicks(0);
-
-        Bukkit.getPluginManager().callEvent(new PvpStartedEvent(player, player, settings.getPvpTime(), PvPStatus.ALL_NOT_IN_PVP));
+        Bukkit.getPluginManager().callEvent(new PvpStartedEvent(player, player, this.settings.getPvpTime(), PvPStatus.ALL_NOT_IN_PVP));
     }
 
     private void tryStartPvP(Player attacker, Player defender) {
-        if (isInIgnoredWorld(attacker) || isInIgnoredRegion(attacker) || isInIgnoredRegion(defender)) {
+        if (this.isInIgnoredWorld(attacker) || this.isInIgnoredRegion(attacker) || this.isInIgnoredRegion(defender)) {
             return;
         }
 
-        if (!isPvPModeEnabled() && settings.isDisablePowerups()) {
-            if (!isHasBypassPermission(attacker)) {
-                powerUpsManager.disablePowerUpsWithRunCommands(attacker);
+        if (!this.isPvPModeEnabled() && this.settings.isDisablePowerups()) {
+            if (!this.isHasBypassPermission(attacker)) {
+                this.powerUpsManager.disablePowerUpsWithRunCommands(attacker);
             }
-            if (!isHasBypassPermission(defender)) {
-                powerUpsManager.disablePowerUps(defender);
+            if (!this.isHasBypassPermission(defender)) {
+                this.powerUpsManager.disablePowerUps(defender);
             }
             return;
         }
 
-        if (!isPvPModeEnabled()) {
-            return;
-        }
+        if (this.isPvPModeEnabled()) {
+            boolean attackerBypassed = this.isHasBypassPermission(attacker);
+            boolean defenderBypassed = this.isHasBypassPermission(defender);
 
-        boolean attackerBypassed = isHasBypassPermission(attacker);
-        boolean defenderBypassed = isHasBypassPermission(defender);
+            if (attackerBypassed && defenderBypassed) {
+                return;
+            }
 
-        if (attackerBypassed && defenderBypassed) {
-            return;
-        }
+            boolean attackerInPvp = this.isInPvP(attacker) || this.isInSilentPvP(attacker);
+            boolean defenderInPvp = this.isInPvP(defender) || this.isInSilentPvP(defender);
 
-        boolean attackerInPvp = isInPvP(attacker) || isInSilentPvP(attacker);
-        boolean defenderInPvp = isInPvP(defender) || isInSilentPvP(defender);
-
-        PvPStatus pvpStatus;
-
-        if (attackerInPvp && defenderInPvp) {
-            updateAttackerAndCallEvent(attacker, defender, attackerBypassed);
-            updateDefenderAndCallEvent(defender, attacker, defenderBypassed);
-            return;
-        } else if (attackerInPvp) {
-            pvpStatus = PvPStatus.ATTACKER_IN_PVP;
-        } else if (defenderInPvp) {
-            pvpStatus = PvPStatus.DEFENDER_IN_PVP;
-        } else {
-            pvpStatus = PvPStatus.ALL_NOT_IN_PVP;
-        }
-
-        if (pvpStatus == PvPStatus.ATTACKER_IN_PVP || pvpStatus == PvPStatus.DEFENDER_IN_PVP) {
-            if (callPvpPreStartEvent(defender, attacker, pvpStatus)) {
+            if (attackerInPvp && defenderInPvp) {
+                this.updateAttackerAndCallEvent(attacker, defender, attackerBypassed);
+                this.updateDefenderAndCallEvent(defender, attacker, defenderBypassed);
+            } else {
+                PvPStatus pvpStatus;
                 if (attackerInPvp) {
-                    updateAttackerAndCallEvent(attacker, defender, attackerBypassed);
-                    startPvp(defender, defenderBypassed, false);
+                    pvpStatus = PvPStatus.ATTACKER_IN_PVP;
+                } else if (defenderInPvp) {
+                    pvpStatus = PvPStatus.DEFENDER_IN_PVP;
                 } else {
-                    updateDefenderAndCallEvent(defender, attacker, defenderBypassed);
-                    startPvp(attacker, attackerBypassed, true);
+                    pvpStatus = PvPStatus.ALL_NOT_IN_PVP;
                 }
-                Bukkit.getPluginManager().callEvent(new PvpStartedEvent(defender, attacker, settings.getPvpTime(), pvpStatus));
-            }
-            return;
-        }
 
-        if (callPvpPreStartEvent(defender, attacker, pvpStatus)) {
-            startPvp(attacker, attackerBypassed, true);
-            startPvp(defender, defenderBypassed, false);
-            Bukkit.getPluginManager().callEvent(new PvpStartedEvent(defender, attacker, settings.getPvpTime(), pvpStatus));
+                if (this.callPvpPreStartEvent(defender, attacker, pvpStatus)) {
+                    if (pvpStatus == PvPStatus.ALL_NOT_IN_PVP) {
+                        this.startPvp(attacker, attackerBypassed, true);
+                        this.startPvp(defender, defenderBypassed, false);
+                    } else if (pvpStatus == PvPStatus.ATTACKER_IN_PVP) {
+                        this.updateAttackerAndCallEvent(attacker, defender, attackerBypassed);
+                        this.startPvp(defender, defenderBypassed, false);
+                    } else {
+                        this.updateDefenderAndCallEvent(defender, attacker, defenderBypassed);
+                        this.startPvp(attacker, attackerBypassed, true);
+                    }
+                    Bukkit.getPluginManager().callEvent(new PvpStartedEvent(defender, attacker, this.settings.getPvpTime(), pvpStatus));
+                }
+            }
         }
     }
 
-    private void startPvp(Player player, boolean bypassed, boolean attacker) {
+    private void startPvp(Player player, boolean bypassed, boolean isAttackerLogic) {
         if (!bypassed) {
-            String message = settings.getMessages().getPvpStarted();
-            if (!message.isEmpty()) {
-                String coloredMessage = Utils.color(message);
-                Component component = LegacyComponentSerializer.legacySection().deserialize(coloredMessage);
+            String message = this.settings.getMessages().getPvpStarted();
+            if (message != null && !message.isEmpty()) {
+                Component component = LegacyComponentSerializer.legacySection().deserialize(Utils.color(message));
                 player.sendMessage(component);
             }
 
-            if (attacker && settings.isDisablePowerups()) {
-                powerUpsManager.disablePowerUpsWithRunCommands(player);
+            if (isAttackerLogic && this.settings.isDisablePowerups()) {
+                this.powerUpsManager.disablePowerUpsWithRunCommands(player);
             }
-
-            sendTitles(player, true);
+            this.sendTitles(player, true);
         }
-
-        updatePvpMode(player, bypassed, settings.getPvpTime());
+        this.updatePvpMode(player, bypassed, this.settings.getPvpTime());
         player.setNoDamageTicks(0);
     }
 
     private void updatePvpMode(Player player, boolean bypassed, int newTime) {
         if (bypassed) {
-            silentPvpMap.put(player, newTime);
+            this.silentPvpMap.put(player, newTime);
         } else {
-            pvpMap.put(player, newTime);
-
-            bossbarManager.setBossBar(player, newTime);
-
-            String actionBar = settings.getMessages().getInPvpActionbar();
-            if (!actionBar.isEmpty()) {
+            this.pvpMap.put(player, newTime);
+            this.bossbarManager.setBossBar(player, newTime);
+            String actionBar = this.settings.getMessages().getInPvpActionbar();
+            if (actionBar != null && !actionBar.isEmpty()) {
                 String formattedActionBar = Utils.color(Utils.replaceTime(actionBar, newTime));
-                sendActionBar(player, formattedActionBar);
+                this.sendActionBar(player, formattedActionBar);
             }
-
-            if (settings.isDisablePowerups()) {
-                powerUpsManager.disablePowerUps(player);
+            if (this.settings.isDisablePowerups()) {
+                this.powerUpsManager.disablePowerUps(player);
             }
         }
     }
 
     private boolean callPvpPreStartEvent(Player defender, Player attacker, PvPStatus pvpStatus) {
-        PvpPreStartEvent pvpPreStartEvent = new PvpPreStartEvent(defender, attacker, settings.getPvpTime(), pvpStatus);
+        PvpPreStartEvent pvpPreStartEvent = new PvpPreStartEvent(defender, attacker, this.settings.getPvpTime(), pvpStatus);
         Bukkit.getPluginManager().callEvent(pvpPreStartEvent);
         return !pvpPreStartEvent.isCancelled();
     }
 
     private void updateAttackerAndCallEvent(Player attacker, Player defender, boolean bypassed) {
-        int oldTime = bypassed ? getTimeRemainingInPvPSilent(attacker) : getTimeRemainingInPvP(attacker);
-        updatePvpMode(attacker, bypassed, settings.getPvpTime());
-
-        PvpTimeUpdateEvent pvpTimeUpdateEvent = new PvpTimeUpdateEvent(attacker, oldTime, settings.getPvpTime());
+        int oldTime = bypassed ? this.getTimeRemainingInPvPSilent(attacker) : this.getTimeRemainingInPvP(attacker);
+        this.updatePvpMode(attacker, bypassed, this.settings.getPvpTime());
+        PvpTimeUpdateEvent pvpTimeUpdateEvent = new PvpTimeUpdateEvent(attacker, oldTime, this.settings.getPvpTime());
         Bukkit.getPluginManager().callEvent(pvpTimeUpdateEvent);
     }
 
     private void updateDefenderAndCallEvent(Player defender, Player attackedBy, boolean bypassed) {
-        int oldTime = bypassed ? getTimeRemainingInPvPSilent(defender) : getTimeRemainingInPvP(defender);
-        updatePvpMode(defender, bypassed, settings.getPvpTime());
-
-        PvpTimeUpdateEvent pvpTimeUpdateEvent = new PvpTimeUpdateEvent(defender, oldTime, settings.getPvpTime());
+        int oldTime = bypassed ? this.getTimeRemainingInPvPSilent(defender) : this.getTimeRemainingInPvP(defender);
+        this.updatePvpMode(defender, bypassed, this.settings.getPvpTime());
+        PvpTimeUpdateEvent pvpTimeUpdateEvent = new PvpTimeUpdateEvent(defender, oldTime, this.settings.getPvpTime());
         Bukkit.getPluginManager().callEvent(pvpTimeUpdateEvent);
     }
 
@@ -336,22 +301,18 @@ public class PvPManager {
         if (player == null || !player.isOnline()) {
             return;
         }
+        this.stopPvPSilent(player);
+        this.sendTitles(player, false);
 
-        stopPvPSilent(player);
-
-        sendTitles(player, false);
-
-        String message = settings.getMessages().getPvpStopped();
-        if (!message.isEmpty()) {
-            String coloredMessage = Utils.color(message);
-            Component component = LegacyComponentSerializer.legacySection().deserialize(coloredMessage);
+        String message = this.settings.getMessages().getPvpStopped();
+        if (message != null && !message.isEmpty()) {
+            Component component = LegacyComponentSerializer.legacySection().deserialize(Utils.color(message));
             player.sendMessage(component);
         }
 
-        String actionBar = settings.getMessages().getPvpStoppedActionbar();
-        if (!actionBar.isEmpty()) {
-            String coloredActionBar = Utils.color(actionBar);
-            sendActionBar(player, coloredActionBar);
+        String actionBar = this.settings.getMessages().getPvpStoppedActionbar();
+        if (actionBar != null && !actionBar.isEmpty()) {
+            this.sendActionBar(player, Utils.color(actionBar));
         }
     }
 
@@ -359,42 +320,35 @@ public class PvPManager {
         if (player == null) {
             return;
         }
+        boolean wasInPvp = this.pvpMap.remove(player) != null;
+        boolean wasInSilentPvp = this.silentPvpMap.remove(player) != null;
 
-        pvpMap.remove(player);
-        silentPvpMap.remove(player);
-        bossbarManager.clearBossbar(player);
-
-        Bukkit.getPluginManager().callEvent(new PvpStoppedEvent(player));
+        if (wasInPvp || wasInSilentPvp) {
+            this.bossbarManager.clearBossbar(player);
+            Bukkit.getPluginManager().callEvent(new PvpStoppedEvent(player));
+        }
     }
 
     public boolean isCommandWhiteListed(String command) {
-        if (command == null || whiteListedCommands.isEmpty()) {
+        if (command == null || this.whiteListedCommands.isEmpty()) {
             return false;
         }
-        return whiteListedCommands.contains(command.toLowerCase());
+        return this.whiteListedCommands.contains(command.toLowerCase());
     }
 
     private void sendTitles(Player player, boolean isPvpStarted) {
-        String titleText = isPvpStarted ?
-                settings.getMessages().getPvpStartedTitle() :
-                settings.getMessages().getPvpStoppedTitle();
+        String titleTextKey = isPvpStarted ? this.settings.getMessages().getPvpStartedTitle() : this.settings.getMessages().getPvpStoppedTitle();
+        String subtitleTextKey = isPvpStarted ? this.settings.getMessages().getPvpStartedSubtitle() : this.settings.getMessages().getPvpStoppedSubtitle();
 
-        String subtitleText = isPvpStarted ?
-                settings.getMessages().getPvpStartedSubtitle() :
-                settings.getMessages().getPvpStoppedSubtitle();
-
-        if (titleText.isEmpty() && subtitleText.isEmpty()) {
+        if ((titleTextKey == null || titleTextKey.isEmpty()) && (subtitleTextKey == null || subtitleTextKey.isEmpty())) {
             return;
         }
 
-        Component title = titleText.isEmpty() ? Component.empty() :
-                LegacyComponentSerializer.legacySection().deserialize(Utils.color(titleText));
-        Component subtitle = subtitleText.isEmpty() ? Component.empty() :
-                LegacyComponentSerializer.legacySection().deserialize(Utils.color(subtitleText));
+        Component title = (titleTextKey == null || titleTextKey.isEmpty()) ? Component.empty() : LegacyComponentSerializer.legacySection().deserialize(Utils.color(titleTextKey));
+        Component subtitle = (subtitleTextKey == null || subtitleTextKey.isEmpty()) ? Component.empty() : LegacyComponentSerializer.legacySection().deserialize(Utils.color(subtitleTextKey));
 
-        Title titleObj = Title.title(title, subtitle,
-                Title.Times.times(Duration.ofMillis(500), Duration.ofMillis(1500), Duration.ofMillis(500)));
-
+        Times times = Times.times(Duration.ofMillis(500L), Duration.ofMillis(1500L), Duration.ofMillis(500L));
+        Title titleObj = Title.title(title, subtitle, times);
         player.showTitle(titleObj);
     }
 
@@ -403,11 +357,11 @@ public class PvPManager {
     }
 
     public boolean isPvPModeEnabled() {
-        return settings.getPvpTime() > 0;
+        return this.settings.getPvpTime() > 0;
     }
 
     public boolean isBypassed(Player player) {
-        return player != null && (isHasBypassPermission(player) || isInIgnoredWorld(player));
+        return player != null && (this.isHasBypassPermission(player) || this.isInIgnoredWorld(player));
     }
 
     public boolean isHasBypassPermission(Player player) {
@@ -415,30 +369,35 @@ public class PvPManager {
     }
 
     public boolean isInIgnoredWorld(Player player) {
-        return player != null &&
-                player.getWorld() != null &&
-                settings.getDisabledWorlds().contains(player.getWorld().getName().toLowerCase());
+        return player != null && player.getWorld() != null &&
+                this.settings.getDisabledWorlds().contains(player.getWorld().getName().toLowerCase());
     }
 
     public boolean isInIgnoredRegion(Player player) {
-        if (player == null ||
-                !plugin.isWorldguardEnabled() ||
-                settings.getIgnoredWgRegions().isEmpty()) {
+        if (player == null || !this.plugin.isWorldguardEnabled() || this.settings.getIgnoredWgRegions().isEmpty()) {
             return false;
         }
 
-        Set<String> ignoredRegions = settings.getIgnoredWgRegions();
+        Set<String> ignoredRegionsLowerCase = this.settings.getIgnoredWgRegions().stream()
+                .map(String::toLowerCase)
+                .collect(Collectors.toSet());
+
         Set<IWrappedRegion> playerRegions = WorldGuardWrapper.getInstance().getRegions(player.getLocation());
-
-        if (playerRegions.isEmpty()) {
+        if (playerRegions == null || playerRegions.isEmpty()) {
             return false;
         }
 
-        for (IWrappedRegion region : playerRegions) {
-            if (region != null && ignoredRegions.contains(region.getId().toLowerCase())) {
-                return true;
-            }
-        }
-        return false;
+        return playerRegions.stream()
+                .filter(Objects::nonNull)
+                .map(region -> region.getId().toLowerCase())
+                .anyMatch(ignoredRegionsLowerCase::contains);
+    }
+
+    public PowerUpsManager getPowerUpsManager() {
+        return this.powerUpsManager;
+    }
+
+    public BossbarManager getBossbarManager() {
+        return this.bossbarManager;
     }
 }

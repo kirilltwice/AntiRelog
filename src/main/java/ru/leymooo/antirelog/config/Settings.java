@@ -127,6 +127,11 @@ public class Settings extends Configuration {
     @Key("hide-death-message")
     private boolean hideDeathMessage = false;
 
+    @Comment("Отключать ли Эндер-сундук во время пвп?")
+    @Key("disable-enderchest-in-pvp")
+    private boolean disableEnderchestInPvp = true;
+
+
     @Comment("Миры в котором плагин не работает")
     private List<String> disabledWorlds = Arrays.asList("world1", "world2");
     @Ignore
@@ -240,6 +245,10 @@ public class Settings extends Configuration {
 
     public boolean isHideDeathMessage() {
         return hideDeathMessage;
+    }
+
+    public boolean isDisableEnderchestInPvp() {
+        return disableEnderchestInPvp;
     }
 
     public List<String> getCommandsOnLeave() {
