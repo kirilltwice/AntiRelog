@@ -1,14 +1,13 @@
 package ru.leymooo.antirelog.listeners;
 
-import lombok.NonNull;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.AreaEffectCloud;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
@@ -24,8 +23,8 @@ import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.entity.PotionSplashEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -43,13 +42,14 @@ import ru.leymooo.antirelog.manager.PvPManager;
 import ru.leymooo.antirelog.util.Utils;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class PvPListener implements Listener {
+
     private static final String FIREWORK_META_KEY = "ar-f-shooter";
     private static final double MAX_TELEPORT_DISTANCE_SQUARED = 100.0D;
     private static final int TELEPORT_GRACE_PERIOD_TICKS = 5;
@@ -59,35 +59,30 @@ public class PvPListener implements Listener {
     private final PvPManager pvpManager;
     private final Settings settings;
     private final Messages messages;
+
     private final Map<Player, AtomicInteger> allowedTeleports = new ConcurrentHashMap<>();
 
-    private static final Set<PotionEffectType> HARMFUL_POTION_EFFECTS = Set.of(
-            PotionEffectType.POISON,
-            PotionEffectType.WITHER,
-            PotionEffectType.INSTANT_DAMAGE
-    );
-
-    public PvPListener(@NonNull Plugin plugin, @NonNull PvPManager pvpManager, @NonNull Settings settings) {
+    public PvPListener(Plugin plugin, PvPManager pvpManager, Settings settings) {
         this.plugin = plugin;
         this.pvpManager = pvpManager;
         this.settings = settings;
         this.messages = settings.getMessages();
-        this.startTeleportCleanupTask();
+        startTeleportCleanupTask();
     }
 
     private void startTeleportCleanupTask() {
-        this.plugin.getServer().getScheduler().runTaskTimer(this.plugin, () -> {
+        Runnable taskRunnable = () -> {
             allowedTeleports.forEach((player, counter) -> counter.incrementAndGet());
             allowedTeleports.entrySet().removeIf(entry -> entry.getValue().get() >= TELEPORT_GRACE_PERIOD_TICKS);
-        }, 1L, 1L);
+        };
+        this.plugin.getServer().getScheduler().runTaskTimerAsynchronously(this.plugin, taskRunnable, 1L, 1L);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityDamageByEntity(EntityDamageByEntityEvent event) {
-        if (event.getEntity().getType() != EntityType.PLAYER) {
+        if (!(event.getEntity() instanceof Player target)) {
             return;
         }
-        Player target = (Player) event.getEntity();
         Player damager = getDamagerFromEntity(event.getDamager());
         if (damager != null && !damager.equals(target)) {
             this.pvpManager.playerDamagedByPlayer(damager, target);
@@ -103,10 +98,9 @@ public class PvPListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityCombustByEntity(EntityCombustByEntityEvent event) {
-        if (!(event.getEntity() instanceof Player)) {
+        if (!(event.getEntity() instanceof Player target)) {
             return;
         }
-        Player target = (Player) event.getEntity();
         Player damager = getDamagerFromEntity(event.getCombuster());
         if (damager != null && !damager.equals(target)) {
             this.pvpManager.playerDamagedByPlayer(damager, target);
@@ -115,29 +109,29 @@ public class PvPListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityShootBow(EntityShootBowEvent event) {
-        if (event.getProjectile() instanceof Firework && event.getEntity().getType() == EntityType.PLAYER) {
-            event.getProjectile().setMetadata(FIREWORK_META_KEY, new FixedMetadataValue(this.plugin, event.getEntity().getUniqueId()));
+        if (event.getProjectile() instanceof Firework && event.getEntity() instanceof Player shooter) {
+            event.getProjectile().setMetadata(FIREWORK_META_KEY, new FixedMetadataValue(this.plugin, shooter.getUniqueId()));
         }
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onPotionSplash(PotionSplashEvent event) {
-        ProjectileSource projectileSource = event.getPotion().getShooter();
-        if (!(projectileSource instanceof Player)) {
+        if (!(event.getPotion().getShooter() instanceof Player shooter)) {
             return;
         }
-        Player shooter = (Player) projectileSource;
-        boolean hasHarmfulEffect = event.getPotion().getEffects().stream()
-                .map(PotionEffect::getType)
-                .anyMatch(HARMFUL_POTION_EFFECTS::contains);
+
+        boolean hasHarmfulEffect = false;
+        for (PotionEffect effect : event.getPotion().getEffects()) {
+            if (effect.getType().getEffectCategory() == PotionEffectType.Category.HARMFUL) {
+                hasHarmfulEffect = true;
+                break;
+            }
+        }
 
         if (hasHarmfulEffect) {
             for (LivingEntity entity : event.getAffectedEntities()) {
-                if (entity instanceof Player) {
-                    Player target = (Player) entity;
-                    if (!target.equals(shooter)) {
-                        this.pvpManager.playerDamagedByPlayer(shooter, target);
-                    }
+                if (entity instanceof Player target && !target.equals(shooter)) {
+                    this.pvpManager.playerDamagedByPlayer(shooter, target);
                 }
             }
         }
@@ -145,33 +139,46 @@ public class PvPListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onPlayerTeleport(PlayerTeleportEvent event) {
-        if (!this.settings.isDisableTeleportsInPvp() || !this.pvpManager.isInPvP(event.getPlayer())) {
+        Player player = event.getPlayer();
+        if (!this.settings.isDisableTeleportsInPvp() || !this.pvpManager.isInPvP(player)) {
             return;
         }
-        Player player = event.getPlayer();
-        TeleportCause cause = event.getCause();
 
-        if (!this.allowedTeleports.containsKey(player)) {
-            if (cause != TeleportCause.CHORUS_FRUIT && cause != TeleportCause.ENDER_PEARL) {
-                boolean isSameWorld = event.getFrom().getWorld() != null && event.getTo().getWorld() != null && event.getFrom().getWorld().equals(event.getTo().getWorld());
-                if (isWorldChange(event) || isLongDistanceTeleport(isSameWorld ? event : null, event)) {
-                    event.setCancelled(true);
-                }
-            } else {
-                this.allowedTeleports.put(player, new AtomicInteger(0));
-            }
+        if (this.allowedTeleports.containsKey(player)) {
+            return;
+        }
+
+        TeleportCause cause = event.getCause();
+        if (cause == TeleportCause.CHORUS_FRUIT || cause == TeleportCause.ENDER_PEARL) {
+            this.allowedTeleports.put(player, new AtomicInteger(0));
+            return;
+        }
+
+        Location from = event.getFrom();
+        Location to = event.getTo();
+
+        if (from == null || to == null || from.getWorld() == null || to.getWorld() == null) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (!from.getWorld().equals(to.getWorld())) {
+            event.setCancelled(true);
+        } else if (from.distanceSquared(to) > MAX_TELEPORT_DISTANCE_SQUARED) {
+            event.setCancelled(true);
         }
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-        if (!this.settings.isDisableCommandsInPvp() || !this.pvpManager.isInPvP(event.getPlayer())) {
+        Player player = event.getPlayer();
+        if (!this.settings.isDisableCommandsInPvp() || !this.pvpManager.isInPvP(player)) {
             return;
         }
         String command = extractCommand(event.getMessage());
         if (!this.pvpManager.isCommandWhiteListed(command)) {
             event.setCancelled(true);
-            this.sendCommandDisabledMessage(event.getPlayer());
+            this.sendCommandDisabledMessage(player);
         }
     }
 
@@ -204,10 +211,12 @@ public class PvPListener implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerDeath(PlayerDeathEvent event) {
+        Player player = event.getEntity();
+
         if (this.settings.isHideDeathMessage()) {
             event.deathMessage(null);
         }
-        Player player = event.getEntity();
+
         if (this.pvpManager.isInSilentPvP(player) || this.pvpManager.isInPvP(player)) {
             this.pvpManager.stopPvPSilent(player);
         }
@@ -225,21 +234,17 @@ public class PvPListener implements Listener {
         if (!this.settings.isDisableEnderchestInPvp()) {
             return;
         }
-
         Player player = event.getPlayer();
         if (!this.pvpManager.isInPvP(player)) {
             return;
         }
-
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) {
             return;
         }
-
         Block clickedBlock = event.getClickedBlock();
         if (clickedBlock == null || clickedBlock.getType() != Material.ENDER_CHEST) {
             return;
         }
-
         event.setCancelled(true);
         String messageText = this.messages.getItemDisabledInPvp();
         if (messageText != null && !messageText.isEmpty()) {
@@ -248,49 +253,40 @@ public class PvPListener implements Listener {
         }
     }
 
-    private boolean isWorldChange(PlayerTeleportEvent event) {
-        if (event.getFrom() == null || event.getTo() == null) return true;
-        if (event.getFrom().getWorld() == null || event.getTo().getWorld() == null) return true;
-        return !event.getFrom().getWorld().equals(event.getTo().getWorld());
-    }
-
-    private boolean isLongDistanceTeleport(PlayerTeleportEvent sameWorldEvent, PlayerTeleportEvent originalEvent) {
-        if (sameWorldEvent == null) {
-            return true;
-        }
-        if (originalEvent.getFrom() == null || originalEvent.getTo() == null) return true;
-        return originalEvent.getFrom().distanceSquared(originalEvent.getTo()) > MAX_TELEPORT_DISTANCE_SQUARED;
-    }
-
-
-    private String extractCommand(String message) {
-        if (message == null || message.isEmpty()) {
+    private String extractCommand(String rawMessage) {
+        if (rawMessage == null || rawMessage.isEmpty()) {
             return "";
         }
-        String[] parts = message.split(" ", 2);
-        return parts[0].startsWith("/") ? parts[0].substring(1) : parts[0];
+        String[] parts = rawMessage.split(" ", 2);
+        String commandPart = parts[0];
+        return commandPart.startsWith("/") ? commandPart.substring(1).toLowerCase(Locale.ROOT) : commandPart.toLowerCase(Locale.ROOT);
     }
 
     private void sendCommandDisabledMessage(Player player) {
         String messageText = this.messages.getCommandsDisabled();
         if (messageText != null && !messageText.isEmpty()) {
-            String formattedMessage = Utils.replaceTime(messageText, this.pvpManager.getTimeRemainingInPvP(player));
+            String formattedMessage = Utils.color(Utils.replaceTime(messageText, this.pvpManager.getTimeRemainingInPvP(player)));
             Component component = LegacyComponentSerializer.legacySection().deserialize(formattedMessage);
             player.sendMessage(component);
         }
     }
 
     private boolean shouldKillOnKick(PlayerKickEvent event) {
-        if (this.settings.getKickMessages().isEmpty()) {
+        List<String> configuredKillReasons = this.settings.getKickMessages();
+        if (configuredKillReasons.isEmpty()) {
             return true;
         }
         Component reasonComponent = event.reason();
         if (reasonComponent == null) {
             return false;
         }
-        String reasonText = LegacyComponentSerializer.legacySection().serialize(reasonComponent).toLowerCase();
-        return this.settings.getKickMessages().stream()
-                .anyMatch(killReason -> reasonText.contains(killReason.toLowerCase()));
+        String reasonText = LegacyComponentSerializer.legacySection().serialize(reasonComponent).toLowerCase(Locale.ROOT);
+        for (String configuredKillReason : configuredKillReasons) {
+            if (reasonText.contains(configuredKillReason.toLowerCase(Locale.ROOT))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void handleKickedInPvp(Player player) {
@@ -312,71 +308,69 @@ public class PvPListener implements Listener {
         this.executeLeaveCommands(player);
     }
 
-    private void sendPlayerLeftMessage(Player player, String messageKey) {
+    private void sendPlayerLeftMessage(Player leaver, String messageKey) {
         if (messageKey == null || messageKey.isEmpty()) {
             return;
         }
-        String formattedMessage = Utils.color(messageKey.replace("%player%", player.getName()));
-        Component message = LegacyComponentSerializer.legacySection().deserialize(formattedMessage);
-        Bukkit.getOnlinePlayers().forEach(onlinePlayer -> onlinePlayer.sendMessage(message));
+        String rawMessage = messageKey.replace("%player%", leaver.getName());
+        Component messageComponent = LegacyComponentSerializer.legacySection().deserialize(Utils.color(rawMessage));
+        for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
+            onlinePlayer.sendMessage(messageComponent);
+        }
     }
-
 
     private void executeLeaveCommands(Player player) {
         List<String> commandsToRun = this.settings.getCommandsOnLeave();
         if (commandsToRun != null && !commandsToRun.isEmpty()) {
             String playerName = player.getName();
-            commandsToRun.forEach(command ->
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", playerName))
-            );
+            for (String command : commandsToRun) {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), command.replace("%player%", playerName));
+            }
         }
     }
 
-    private Player getDamagerFromEntity(Entity damagerEntity) {
-        Entity currentDamager = damagerEntity;
-        for (int i = 0; i < MAX_DAMAGER_SEARCH_DEPTH && currentDamager != null; i++) {
-            if (currentDamager instanceof Player) {
-                return (Player) currentDamager;
+    private Player getDamagerFromEntity(Entity initialDamager) {
+        Entity currentEntity = initialDamager;
+        for (int i = 0; i < MAX_DAMAGER_SEARCH_DEPTH && currentEntity != null; i++) {
+            if (currentEntity instanceof Player player) {
+                return player;
             }
 
-            if (currentDamager instanceof Projectile) {
-                Projectile projectile = (Projectile) currentDamager;
+            if (currentEntity instanceof Projectile projectile) {
                 ProjectileSource shooter = projectile.getShooter();
-                if (shooter instanceof Player) {
-                    return (Player) shooter;
+                if (shooter instanceof Player playerShooter) {
+                    return playerShooter;
                 }
-                if (shooter instanceof Entity) {
-                    currentDamager = (Entity) shooter;
+                if (shooter instanceof Entity entityShooter) {
+                    currentEntity = entityShooter;
                     continue;
                 }
                 return null;
             }
 
-            if (currentDamager instanceof TNTPrimed) {
-                TNTPrimed tnt = (TNTPrimed) currentDamager;
+            if (currentEntity instanceof TNTPrimed tnt) {
                 Entity source = tnt.getSource();
-                if (source != null && source != currentDamager) {
-                    currentDamager = source;
+                if (source != null && source != tnt && source instanceof Entity) {
+                    currentEntity = source;
                     continue;
                 }
                 return null;
             }
 
-            if (currentDamager instanceof AreaEffectCloud) {
-                AreaEffectCloud cloud = (AreaEffectCloud) currentDamager;
+            if (currentEntity instanceof AreaEffectCloud cloud) {
                 ProjectileSource source = cloud.getSource();
-                if (source instanceof Player) {
-                    return (Player) source;
+                if (source instanceof Player playerSource) {
+                    return playerSource;
                 }
-                if (source instanceof Entity) {
-                    currentDamager = (Entity) source;
+                if (source instanceof Entity entitySource) {
+                    currentEntity = entitySource;
                     continue;
                 }
                 return null;
             }
 
-            if (currentDamager instanceof Firework) {
-                return getFireworkShooter((Firework) currentDamager);
+            if (currentEntity instanceof Firework firework) {
+                return getFireworkShooter(firework);
             }
             return null;
         }
@@ -384,12 +378,11 @@ public class PvPListener implements Listener {
     }
 
     private Player getFireworkShooter(Firework firework) {
-        List<MetadataValue> metadataValues = firework.getMetadata(FIREWORK_META_KEY);
-        for (MetadataValue meta : metadataValues) {
+        for (MetadataValue meta : firework.getMetadata(FIREWORK_META_KEY)) {
             if (this.plugin.equals(meta.getOwningPlugin())) {
                 firework.removeMetadata(FIREWORK_META_KEY, this.plugin);
-                if (meta.value() instanceof UUID) {
-                    return Bukkit.getPlayer((UUID) meta.value());
+                if (meta.value() instanceof UUID shooterUuid) {
+                    return Bukkit.getPlayer(shooterUuid);
                 }
                 return null;
             }

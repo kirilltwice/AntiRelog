@@ -3,6 +3,7 @@ package ru.leymooo.antirelog.manager;
 import com.Zrips.CMI.CMI;
 import com.Zrips.CMI.Containers.CMIUser;
 import de.myzelyam.api.vanish.VanishAPI;
+import lombok.RequiredArgsConstructor;
 import me.libraryaddict.disguise.DisguiseAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -11,11 +12,10 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
-
 import ru.leymooo.antirelog.config.Settings;
 import ru.leymooo.antirelog.util.Utils;
 
-
+@RequiredArgsConstructor
 public class PowerUpsManager {
 
     private final Settings settings;
@@ -23,11 +23,10 @@ public class PowerUpsManager {
     private boolean vanishAPIEnabled;
     private boolean libsDisguisesEnabled;
     private boolean cmiEnabled;
-    private Object vanishNoPacket;
-    private Object essentials;
+    private Object vanishNoPacketPluginInstance;
+    private Object essentialsPluginInstance;
 
-    public PowerUpsManager(Settings settings) {
-        this.settings = settings;
+    {
         detectPlugins();
     }
 
@@ -36,16 +35,15 @@ public class PowerUpsManager {
             return false;
         }
 
-        boolean disabled = false;
+        boolean disabledSomething = false;
+        disabledSomething |= disableCreativeMode(player);
+        disabledSomething |= disableFlight(player);
+        disabledSomething |= disableEssentialsFeatures(player);
+        disabledSomething |= disableCMIFeatures(player);
+        disabledSomething |= disableVanishFeatures(player);
+        disabledSomething |= disableDisguiseFeatures(player);
 
-        disabled |= disableCreativeMode(player);
-        disabled |= disableFlight(player);
-        disabled |= disableEssentialsFeatures(player);
-        disabled |= disableCMIFeatures(player);
-        disabled |= disableVanishFeatures(player);
-        disabled |= disableDisguiseFeatures(player);
-
-        return disabled;
+        return disabledSomething;
     }
 
     public void disablePowerUpsWithRunCommands(Player player) {
@@ -53,14 +51,14 @@ public class PowerUpsManager {
             return;
         }
 
+        String playerName = player.getName();
         settings.getCommandsOnPowerupsDisable()
                 .forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
-                        command.replace("%player%", player.getName())));
+                        command.replace("%player%", playerName)));
 
         String message = settings.getMessages().getPvpStartedWithPowerups();
-        if (!message.isEmpty() && player.isOnline()) {
-            String coloredMessage = Utils.color(message);
-            Component component = LegacyComponentSerializer.legacySection().deserialize(coloredMessage);
+        if (message != null && !message.isEmpty() && player.isOnline()) {
+            Component component = LegacyComponentSerializer.legacySection().deserialize(Utils.color(message));
             player.sendMessage(component);
         }
     }
@@ -69,8 +67,8 @@ public class PowerUpsManager {
         PluginManager pluginManager = Bukkit.getPluginManager();
 
         this.vanishAPIEnabled = isPluginEnabled(pluginManager, "SuperVanish", "PremiumVanish");
-        this.vanishNoPacket = getVanishNoPacketPlugin(pluginManager);
-        this.essentials = getEssentialsPlugin(pluginManager);
+        this.vanishNoPacketPluginInstance = getVanishNoPacketPluginInstance(pluginManager);
+        this.essentialsPluginInstance = getEssentialsPluginInstance(pluginManager);
         this.libsDisguisesEnabled = pluginManager.isPluginEnabled("LibsDisguises");
         this.cmiEnabled = pluginManager.isPluginEnabled("CMI");
     }
@@ -79,12 +77,7 @@ public class PowerUpsManager {
         if (player.getGameMode() != GameMode.CREATIVE) {
             return false;
         }
-
-        GameMode targetMode = Bukkit.getDefaultGameMode() == GameMode.ADVENTURE
-                ? GameMode.ADVENTURE
-                : GameMode.SURVIVAL;
-
-        player.setGameMode(targetMode);
+        player.setGameMode(Bukkit.getDefaultGameMode() == GameMode.ADVENTURE ? GameMode.ADVENTURE : GameMode.SURVIVAL);
         return true;
     }
 
@@ -92,33 +85,31 @@ public class PowerUpsManager {
         if (!player.isFlying() && !player.getAllowFlight()) {
             return false;
         }
-
         player.setFlying(false);
         player.setAllowFlight(false);
         return true;
     }
 
     private boolean disableEssentialsFeatures(Player player) {
-        if (essentials == null) {
+        if (this.essentialsPluginInstance == null) {
             return false;
         }
-
         try {
-            Object user = essentials.getClass().getMethod("getUser", Player.class).invoke(essentials, player);
-            boolean disabled = false;
+            Object user = this.essentialsPluginInstance.getClass().getMethod("getUser", Player.class).invoke(this.essentialsPluginInstance, player);
+            if (user == null) return false;
 
-            Boolean isVanished = (Boolean) user.getClass().getMethod("isVanished").invoke(user);
-            if (isVanished) {
+            boolean disabled = false;
+            Object isVanishedResult = user.getClass().getMethod("isVanished").invoke(user);
+            if (isVanishedResult instanceof Boolean && (Boolean) isVanishedResult) {
                 user.getClass().getMethod("setVanished", boolean.class).invoke(user, false);
                 disabled = true;
             }
 
-            Boolean isGodMode = (Boolean) user.getClass().getMethod("isGodModeEnabled").invoke(user);
-            if (isGodMode) {
+            Object isGodModeResult = user.getClass().getMethod("isGodModeEnabled").invoke(user);
+            if (isGodModeResult instanceof Boolean && (Boolean) isGodModeResult) {
                 user.getClass().getMethod("setGodModeEnabled", boolean.class).invoke(user, false);
                 disabled = true;
             }
-
             return disabled;
         } catch (Exception e) {
             return false;
@@ -126,29 +117,24 @@ public class PowerUpsManager {
     }
 
     private boolean disableCMIFeatures(Player player) {
-        if (!cmiEnabled) {
+        if (!this.cmiEnabled) {
             return false;
         }
-
         try {
             CMIUser user = CMI.getInstance().getPlayerManager().getUser(player);
             if (user == null) {
                 return false;
             }
-
             boolean disabled = false;
-
             if (user.isGod()) {
                 CMI.getInstance().getNMS().changeGodMode(player, false);
                 user.setTgod(0L);
                 disabled = true;
             }
-
             if (user.isVanished()) {
                 user.setVanished(false);
                 disabled = true;
             }
-
             return disabled;
         } catch (Exception e) {
             return false;
@@ -157,8 +143,7 @@ public class PowerUpsManager {
 
     private boolean disableVanishFeatures(Player player) {
         boolean disabled = false;
-
-        if (vanishAPIEnabled) {
+        if (this.vanishAPIEnabled) {
             try {
                 if (VanishAPI.isInvisible(player)) {
                     VanishAPI.showPlayer(player);
@@ -166,34 +151,30 @@ public class PowerUpsManager {
                 }
             } catch (Exception ignored) {}
         }
-
-        if (vanishNoPacket != null) {
+        if (this.vanishNoPacketPluginInstance != null) {
             try {
-                Object manager = vanishNoPacket.getClass().getMethod("getManager").invoke(vanishNoPacket);
-                boolean isVanished = (Boolean) manager.getClass().getMethod("isVanished", Player.class).invoke(manager, player);
-                if (isVanished) {
-                    manager.getClass().getMethod("toggleVanishQuiet", Player.class, boolean.class)
-                            .invoke(manager, player, false);
+                Object manager = this.vanishNoPacketPluginInstance.getClass().getMethod("getManager").invoke(this.vanishNoPacketPluginInstance);
+                if (manager == null) return disabled;
+                Object isVanishedResult = manager.getClass().getMethod("isVanished", Player.class).invoke(manager, player);
+                if (isVanishedResult instanceof Boolean && (Boolean) isVanishedResult) {
+                    manager.getClass().getMethod("toggleVanishQuiet", Player.class, boolean.class).invoke(manager, player, false);
                     disabled = true;
                 }
             } catch (Exception ignored) {}
         }
-
         return disabled;
     }
 
     private boolean disableDisguiseFeatures(Player player) {
-        if (!libsDisguisesEnabled) {
+        if (!this.libsDisguisesEnabled) {
             return false;
         }
-
         try {
             if (DisguiseAPI.isSelfDisguised(player)) {
                 DisguiseAPI.undisguiseToAll(player);
                 return true;
             }
         } catch (Exception ignored) {}
-
         return false;
     }
 
@@ -206,11 +187,10 @@ public class PowerUpsManager {
         return false;
     }
 
-    private Object getEssentialsPlugin(PluginManager manager) {
+    private Object getEssentialsPluginInstance(PluginManager manager) {
         if (!manager.isPluginEnabled("Essentials")) {
             return null;
         }
-
         try {
             Plugin plugin = manager.getPlugin("Essentials");
             Class<?> essentialsClass = Class.forName("com.earth2me.essentials.Essentials");
@@ -220,11 +200,10 @@ public class PowerUpsManager {
         }
     }
 
-    private Object getVanishNoPacketPlugin(PluginManager manager) {
+    private Object getVanishNoPacketPluginInstance(PluginManager manager) {
         if (!manager.isPluginEnabled("VanishNoPacket")) {
             return null;
         }
-
         try {
             Plugin plugin = manager.getPlugin("VanishNoPacket");
             Class<?> vanishPluginClass = Class.forName("org.kitteh.vanish.VanishPlugin");

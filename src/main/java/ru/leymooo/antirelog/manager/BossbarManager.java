@@ -11,11 +11,13 @@ import ru.leymooo.antirelog.util.Utils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 @RequiredArgsConstructor
 public class BossbarManager {
 
     private final Map<Integer, BossBar> bossBars = new HashMap<>();
+    private final Map<Player, BossBar> activePlayerBars = new WeakHashMap<>();
     private final Settings settings;
 
     public void createBossBars() {
@@ -26,34 +28,43 @@ public class BossbarManager {
         }
 
         String titleTemplate = settings.getMessages().getInPvpBossbar();
-        if (titleTemplate.isEmpty()) {
+        if (titleTemplate == null || titleTemplate.isEmpty()) {
             return;
         }
 
         double progressIncrement = 1.0 / settings.getPvpTime();
-        double currentProgress = progressIncrement;
+        double currentProgress = 0;
 
         for (int timeRemaining = 1; timeRemaining <= settings.getPvpTime(); timeRemaining++) {
+            currentProgress = (double) timeRemaining * progressIncrement;
+
             String formattedTitle = Utils.color(Utils.replaceTime(titleTemplate, timeRemaining));
 
             BossBar bossBar = Bukkit.createBossBar(formattedTitle, BarColor.RED, BarStyle.SOLID);
-            bossBar.setProgress(Math.min(currentProgress, 1.0));
+            bossBar.setProgress(Math.min(Math.max(currentProgress, 0.0), 1.0));
 
             bossBars.put(timeRemaining, bossBar);
-            currentProgress += progressIncrement;
         }
     }
 
     public void setBossBar(Player player, int timeRemaining) {
-        if (player == null || !player.isOnline() || bossBars.isEmpty()) {
+        if (player == null || !player.isOnline()) {
             return;
         }
 
-        bossBars.values().forEach(bar -> bar.removePlayer(player));
+        BossBar oldBar = activePlayerBars.remove(player);
+        if (oldBar != null) {
+            oldBar.removePlayer(player);
+        }
 
-        BossBar targetBar = bossBars.get(timeRemaining);
-        if (targetBar != null) {
-            targetBar.addPlayer(player);
+        if (timeRemaining <= 0) {
+            return;
+        }
+
+        BossBar newBar = bossBars.get(timeRemaining);
+        if (newBar != null) {
+            newBar.addPlayer(player);
+            activePlayerBars.put(player, newBar);
         }
     }
 
@@ -61,11 +72,23 @@ public class BossbarManager {
         if (player == null) {
             return;
         }
-        bossBars.values().forEach(bar -> bar.removePlayer(player));
+        BossBar currentBar = activePlayerBars.remove(player);
+        if (currentBar != null) {
+            currentBar.removePlayer(player);
+        }
     }
 
     public void clearBossbars() {
-        bossBars.values().forEach(BossBar::removeAll);
+        for (BossBar bar : activePlayerBars.values()) {
+            if (bar != null) {
+                bar.removeAll();
+            }
+        }
+        activePlayerBars.clear();
+
+        for (BossBar bar : bossBars.values()) {
+            bar.removeAll();
+        }
         bossBars.clear();
     }
 }

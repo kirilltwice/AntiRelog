@@ -1,92 +1,66 @@
 package ru.leymooo.antirelog.manager;
 
-import com.comphenix.protocol.events.PacketContainer;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import ru.leymooo.antirelog.Antirelog;
 import ru.leymooo.antirelog.config.Settings;
-import ru.leymooo.antirelog.util.ProtocolLibUtils;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import java.util.concurrent.TimeUnit;
 
-@RequiredArgsConstructor
 public class CooldownManager {
 
-    private final Antirelog plugin;
     @Getter
     private final Settings settings;
-    private final ScheduledExecutorService scheduledExecutorService;
-    private final Map<Player, Map<CooldownType, Long>> cooldowns = new HashMap<>();
-    private final Map<Player, Map<CooldownType, ScheduledFuture<?>>> futures = new HashMap<>();
+    private final Map<Player, Map<CooldownType, Long>> cooldownEndTimes = new ConcurrentHashMap<>();
 
-    public CooldownManager(Antirelog plugin, Settings settings) {
-        this.plugin = plugin;
+    public CooldownManager(Settings settings) {
         this.settings = settings;
-        this.scheduledExecutorService = plugin.isProtocolLibEnabled()
-                ? Executors.newSingleThreadScheduledExecutor(r -> {
-            Thread thread = new Thread(r, "AntiRelog-Cooldown");
-            thread.setDaemon(true);
-            return thread;
-        })
-                : null;
     }
 
-    public void addCooldown(Player player, CooldownType type) {
-        cooldowns.computeIfAbsent(player, k -> new HashMap<>())
-                .put(type, System.currentTimeMillis());
-    }
-
-    public void addItemCooldown(Player player, CooldownType type, long duration) {
-        if (!plugin.isProtocolLibEnabled() || !player.isOnline()) {
+    public void addPlayerCooldown(Player player, CooldownType type, int durationSeconds) {
+        if (durationSeconds <= 0 || player == null || !player.isOnline()) {
             return;
         }
+        long durationMillis = durationSeconds * 1000L;
+        long endTime = System.currentTimeMillis() + durationMillis;
 
-        try {
-            int durationInTicks = (int) Math.ceil(duration / 50.0);
-            PacketContainer packet = ProtocolLibUtils.createCooldownPacket(type.getMaterial(), durationInTicks);
-
-            if (packet != null) {
-                ProtocolLibUtils.sendPacket(packet, player);
-
-                ScheduledFuture<?> future = scheduledExecutorService.schedule(() -> {
-                    if (player.isOnline()) {
-                        removeItemCooldown(player, type);
-                    }
-                }, duration, TimeUnit.MILLISECONDS);
-
-                futures.computeIfAbsent(player, k -> new HashMap<>())
-                        .put(type, future);
-            }
-        } catch (Exception e) {
+        cooldownEndTimes.computeIfAbsent(player, k -> new ConcurrentHashMap<>()).put(type, endTime);
+        if (type.getMaterial() != null) {
+            player.setCooldown(type.getMaterial(), durationSeconds * 20);
         }
     }
 
-    public void removeItemCooldown(Player player, CooldownType type) {
-        if (!plugin.isProtocolLibEnabled()) {
+    public void addPlayerCooldownMillis(Player player, CooldownType type, long durationMillis) {
+        if (durationMillis <= 0 || player == null || !player.isOnline()) {
             return;
         }
+        long endTime = System.currentTimeMillis() + durationMillis;
+        cooldownEndTimes.computeIfAbsent(player, k -> new ConcurrentHashMap<>()).put(type, endTime);
 
-        Map<CooldownType, ScheduledFuture<?>> playerFutures = futures.get(player);
-        if (playerFutures != null) {
-            ScheduledFuture<?> future = playerFutures.remove(type);
-            if (future != null && !future.isCancelled()) {
-                future.cancel(false);
+        if (type.getMaterial() != null) {
+            int ticks = (int) Math.ceil(durationMillis / 50.0);
+            if (ticks > 0) {
+                player.setCooldown(type.getMaterial(), ticks);
             }
         }
+    }
 
-        if (player.isOnline()) {
-            try {
-                PacketContainer packet = ProtocolLibUtils.createCooldownPacket(type.getMaterial(), 0);
-                if (packet != null) {
-                    ProtocolLibUtils.sendPacket(packet, player);
-                }
-            } catch (Exception e) {
+    public void removePlayerCooldown(Player player, CooldownType type) {
+        if (player == null) {
+            return;
+        }
+        Map<CooldownType, Long> playerCooldowns = cooldownEndTimes.get(player);
+        if (playerCooldowns != null) {
+            playerCooldowns.remove(type);
+            if (playerCooldowns.isEmpty()) {
+                cooldownEndTimes.remove(player);
             }
+        }
+        if (player.isOnline() && type.getMaterial() != null) {
+            player.setCooldown(type.getMaterial(), 0);
         }
     }
 
@@ -94,18 +68,19 @@ public class CooldownManager {
         if (!player.isOnline()) {
             return;
         }
-
         for (CooldownType cooldownType : CooldownType.VALUES) {
-            int cooldown = cooldownType.getCooldown(settings);
-            if (cooldown == 0) {
+            int configCooldownSeconds = cooldownType.getCooldown(settings);
+            if (configCooldownSeconds == 0) {
                 continue;
             }
 
-            if (cooldown > 0 && hasCooldown(player, cooldownType, cooldown * 1000L)) {
-                long remaining = getRemaining(player, cooldownType, cooldown * 1000L);
-                addItemCooldown(player, cooldownType, remaining);
-            } else if (cooldown < 0) {
-                addItemCooldown(player, cooldownType, 300_000L);
+            if (configCooldownSeconds < 0) {
+                addPlayerCooldownMillis(player, cooldownType, 300_000L);
+            } else {
+                long remainingMillis = getRemainingMillis(player, cooldownType);
+                if (remainingMillis > 0 && cooldownType.getMaterial() != null) {
+                    player.setCooldown(cooldownType.getMaterial(), (int) Math.ceil(remainingMillis / 50.0));
+                }
             }
         }
     }
@@ -114,80 +89,71 @@ public class CooldownManager {
         if (!player.isOnline()) {
             return;
         }
-
         for (CooldownType cooldownType : CooldownType.VALUES) {
-            int cooldown = cooldownType.getCooldown(settings);
-            if (cooldown > 0 && hasCooldown(player, cooldownType, cooldown * 1000L)) {
-                removeItemCooldown(player, cooldownType);
+            int configCooldownSeconds = cooldownType.getCooldown(settings);
+            if (configCooldownSeconds < 0) {
+                removePlayerCooldown(player, cooldownType);
             }
         }
     }
 
-    public boolean hasCooldown(Player player, CooldownType type, long duration) {
-        Map<CooldownType, Long> playerCooldowns = cooldowns.get(player);
+    public boolean hasCooldown(Player player, CooldownType type) {
+        Map<CooldownType, Long> playerCooldowns = cooldownEndTimes.get(player);
         if (playerCooldowns == null) {
             return false;
         }
-
-        Long startTime = playerCooldowns.get(type);
-        return startTime != null && (System.currentTimeMillis() - startTime) < duration;
+        Long endTime = playerCooldowns.get(type);
+        return endTime != null && System.currentTimeMillis() < endTime;
     }
 
-    public long getRemaining(Player player, CooldownType type, long duration) {
-        Map<CooldownType, Long> playerCooldowns = cooldowns.get(player);
+    public long getRemainingMillis(Player player, CooldownType type) {
+        Map<CooldownType, Long> playerCooldowns = cooldownEndTimes.get(player);
         if (playerCooldowns == null) {
-            return 0;
+            return 0L;
         }
-
-        Long startTime = playerCooldowns.get(type);
-        if (startTime == null) {
-            return 0;
+        Long endTime = playerCooldowns.get(type);
+        if (endTime == null) {
+            return 0L;
         }
-
-        return Math.max(0, duration - (System.currentTimeMillis() - startTime));
+        return Math.max(0L, endTime - System.currentTimeMillis());
     }
 
-    public void remove(Player player) {
-        cooldowns.remove(player);
-
-        Map<CooldownType, ScheduledFuture<?>> playerFutures = futures.remove(player);
-        if (playerFutures != null) {
-            playerFutures.values().forEach(future -> future.cancel(false));
-        }
+    public int getRemainingSeconds(Player player, CooldownType type) {
+        return (int) TimeUnit.MILLISECONDS.toSeconds(getRemainingMillis(player, type));
     }
 
-    public void clearAll() {
-        futures.values().forEach(playerFutures ->
-                playerFutures.forEach((type, future) -> {
-                    future.cancel(true);
-                    removeItemCooldown((Player) futures.entrySet().stream()
-                            .filter(entry -> entry.getValue() == playerFutures)
-                            .map(entry -> entry.getKey())
-                            .findFirst()
-                            .orElse(null), type);
-                })
-        );
-
-        futures.clear();
-        cooldowns.clear();
-    }
-
-    public void shutdown() {
-        if (scheduledExecutorService != null && !scheduledExecutorService.isShutdown()) {
-            scheduledExecutorService.shutdown();
-            try {
-                if (!scheduledExecutorService.awaitTermination(5, TimeUnit.SECONDS)) {
-                    scheduledExecutorService.shutdownNow();
+    public void removeAllCooldowns(Player player) {
+        Map<CooldownType, Long> playerMap = cooldownEndTimes.remove(player);
+        if (playerMap != null && player.isOnline()) {
+            for (CooldownType type : playerMap.keySet()) {
+                if (type.getMaterial() != null) {
+                    player.setCooldown(type.getMaterial(), 0);
                 }
-            } catch (InterruptedException e) {
-                scheduledExecutorService.shutdownNow();
-                Thread.currentThread().interrupt();
             }
         }
     }
 
+    public void clearAllPlayerData() {
+        for (Player player : cooldownEndTimes.keySet()) {
+            if (player.isOnline()) {
+                Map<CooldownType, Long> playerSpecificCooldowns = cooldownEndTimes.get(player);
+                if (playerSpecificCooldowns != null) {
+                    for (CooldownType type : playerSpecificCooldowns.keySet()) {
+                        if (type.getMaterial() != null) {
+                            player.setCooldown(type.getMaterial(), 0);
+                        }
+                    }
+                }
+            }
+        }
+        cooldownEndTimes.clear();
+    }
+
+    public void shutdown() {
+        clearAllPlayerData();
+    }
+
     @Getter
-    @RequiredArgsConstructor
     public enum CooldownType {
         GOLDEN_APPLE(Material.GOLDEN_APPLE, Settings::getGoldenAppleCooldown),
         ENC_GOLDEN_APPLE(Material.ENCHANTED_GOLDEN_APPLE, Settings::getEnchantedGoldenAppleCooldown),
@@ -197,9 +163,13 @@ public class CooldownManager {
         FIREWORK(Material.FIREWORK_ROCKET, Settings::getFireworkCooldown);
 
         public static final CooldownType[] VALUES = values();
-
         private final Material material;
         private final Function<Settings, Integer> cooldownFunction;
+
+        CooldownType(Material material, Function<Settings, Integer> cooldownFunction) {
+            this.material = material;
+            this.cooldownFunction = cooldownFunction;
+        }
 
         public int getCooldown(Settings settings) {
             return cooldownFunction.apply(settings);

@@ -119,10 +119,6 @@
             <url>https://repo.md-5.net/content/groups/public/</url>
         </repository>
         <repository>
-            <id>dmulloy2-repo</id>
-            <url>https://repo.dmulloy2.net/repository/public/</url>
-        </repository>
-        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
@@ -177,12 +173,6 @@
             <version>ANY</version>
             <scope>system</scope>
             <systemPath>${project.basedir}/libs/CMIAPI-9.7.4.1.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>com.comphenix.protocol</groupId>
-            <artifactId>ProtocolLib</artifactId>
-            <version>5.3.0</version>
-            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

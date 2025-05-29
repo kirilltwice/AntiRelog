@@ -32,23 +32,6 @@ public class PvpTimeUpdateEvent extends Event {
         this.newTimeSeconds = newTimeSeconds;
     }
 
-    @Deprecated
-    public PvpTimeUpdateEvent(boolean isAsync, @NotNull Player player, int oldTimeSeconds, int newTimeSeconds) {
-        super(isAsync);
-        this.player = player;
-        this.oldTimeSeconds = oldTimeSeconds;
-        this.newTimeSeconds = newTimeSeconds;
-    }
-
-    public void setTargetPlayer(@Nullable Player targetPlayer) {
-        this.targetPlayer = targetPlayer;
-    }
-
-    public void setSourcePlayer(@Nullable Player sourcePlayer) {
-        this.sourcePlayer = sourcePlayer;
-    }
-
-
     @NotNull
     @Override
     public HandlerList getHandlers() {

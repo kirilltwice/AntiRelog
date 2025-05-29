@@ -30,16 +30,6 @@ public class PvpPreStartEvent extends Event implements Cancellable {
         this.cancelled = false;
     }
 
-    @Deprecated
-    public PvpPreStartEvent(boolean isAsync, @NotNull Player defender, @NotNull Player attacker, int pvpTimeSeconds, @NotNull PvPStatus pvpStatus) {
-        super(isAsync);
-        this.defender = defender;
-        this.attacker = attacker;
-        this.pvpTimeSeconds = pvpTimeSeconds;
-        this.pvpStatus = pvpStatus;
-        this.cancelled = false;
-    }
-
     @NotNull
     @Override
     public HandlerList getHandlers() {
@@ -54,6 +44,6 @@ public class PvpPreStartEvent extends Event implements Cancellable {
     public enum PvPStatus {
         ATTACKER_IN_PVP,
         DEFENDER_IN_PVP,
-        ALL_NOT_IN_PVP;
+        ALL_NOT_IN_PVP
     }
 }

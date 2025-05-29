@@ -3,6 +3,7 @@ package ru.leymooo.antirelog;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import ru.leymooo.annotatedyaml.Configuration;
@@ -18,7 +19,6 @@ import ru.leymooo.antirelog.manager.CooldownManager;
 import ru.leymooo.antirelog.manager.PowerUpsManager;
 import ru.leymooo.antirelog.manager.PvPManager;
 import ru.leymooo.antirelog.command.AntiRelogCommand;
-import ru.leymooo.antirelog.util.ProtocolLibUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,24 +36,24 @@ public class Antirelog extends JavaPlugin {
     private Settings settings;
     private PvPManager pvpManager;
     private CooldownManager cooldownManager;
-    private boolean protocolLib;
+    private CooldownListener cooldownListener;
     private boolean worldguard;
 
     @Override
     public void onEnable() {
+        saveDefaultConfig();
         loadConfig();
-        pvpManager = new PvPManager(settings, this);
+
+        this.pvpManager = new PvPManager(settings, this);
+        this.cooldownManager = new CooldownManager(settings);
+
         detectPlugins();
-        cooldownManager = new CooldownManager(this, settings);
-        if (protocolLib) {
-            try {
-                ProtocolLibUtils.createListener(cooldownManager, pvpManager, this);
-            } catch (Exception e) {
-                protocolLib = false;
-            }
-        }
+
+        this.cooldownListener = new CooldownListener(this, cooldownManager, pvpManager, settings);
+        this.cooldownListener.initializeListeners();
+        getServer().getPluginManager().registerEvents(this.cooldownListener, this);
+
         getServer().getPluginManager().registerEvents(new PvPListener(this, pvpManager, settings), this);
-        getServer().getPluginManager().registerEvents(new CooldownListener(this, cooldownManager, pvpManager, settings), this);
 
         AntiRelogCommand commandHandler = new AntiRelogCommand(this, pvpManager);
         getCommand("antirelog").setExecutor(commandHandler);
@@ -88,27 +88,30 @@ public class Antirelog extends JavaPlugin {
                 Files.move(file.toPath(), new File(file.getParentFile(), "config.old." + System.nanoTime()).toPath(),
                         StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
-                e.printStackTrace();
+                getLogger().log(Level.WARNING, "Не удалось переместить старый config.yml", e);
             }
             provider.reloadFileFromDisk();
         }
         if (!file.exists()) {
             settings.save();
             settings.loaded();
-            getLogger().info("config.yml успешно создан");
+            getLogger().info("config.yml успешно создан.");
         } else if (provider.isFileSuccessfullyLoaded()) {
             if (settings.load()) {
-                if (!((String) provider.get("config-version")).equals(settings.getConfigVersion())) {
-                    getLogger().info("Конфиг был обновлен. Проверьте новые значения");
+                Object configVersionObj = provider.get("config-version");
+                String configVersionOnDisk = configVersionObj instanceof String ? (String) configVersionObj : null;
+                if (configVersionOnDisk == null || !configVersionOnDisk.equals(settings.getConfigVersion())) {
+                    getLogger().info("Конфигурация была обновлена. Проверьте новые значения.");
                     settings.save();
                 }
-                getLogger().info("Конфиг успешно загружен");
+                getLogger().info("Конфигурация успешно загружена.");
             } else {
-                getLogger().warning("Не удалось загрузить конфиг");
+                getLogger().warning("Не удалось загрузить конфигурацию. Используются значения по умолчанию.");
                 settings.loaded();
             }
         } else {
-            getLogger().warning("Can't load settings from file, using default...");
+            getLogger().warning("Не удалось загрузить настройки из файла (возможно, он поврежден), используются значения по умолчанию...");
+            settings.loaded();
         }
     }
 
@@ -117,41 +120,43 @@ public class Antirelog extends JavaPlugin {
         if (!oldFolder.exists()) {
             return;
         }
-
         try {
             File actualFolder = oldFolder.getCanonicalFile();
-            if (actualFolder.getName().equals("Antirelog")) {
+            if (actualFolder.exists() && actualFolder.isDirectory() && actualFolder.getName().equals("Antirelog")) {
                 File oldConfig = new File(actualFolder, "config.yml");
-                if (!oldConfig.exists()) {
-                    deleteFolder(actualFolder.toPath());
-                    return;
+                List<String> oldConfigLines = null;
+                if (oldConfig.exists()) {
+                    oldConfigLines = Files.readAllLines(oldConfig.toPath(), StandardCharsets.UTF_8);
                 }
-                List<String> oldConfigLines = Files.readAllLines(oldConfig.toPath(), StandardCharsets.UTF_8);
-                String firstLine = oldConfigLines.size() > 0 ? oldConfigLines.get(0) : null;
+
                 deleteFolder(actualFolder.toPath());
 
                 File newFolder = getDataFolder();
                 if (!newFolder.exists()) {
-                    newFolder.mkdir();
-                }
-                File oldConfigInNewFolder = new File(newFolder, "config.yml");
-
-                if (firstLine != null && firstLine.startsWith("config-version")) {
-                    if (oldConfigInNewFolder.exists()) {
-                        Files.move(oldConfigInNewFolder.toPath(), new File(oldConfigInNewFolder.getParentFile(),
-                                "config.old." + System.nanoTime()).toPath());
+                    if(!newFolder.mkdirs()) {
+                        getLogger().warning("Не удалось создать новую папку плагина: " + newFolder.getPath());
+                        return;
                     }
-                    Files.write(oldConfigInNewFolder.toPath(), oldConfigLines, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
-                    getLogger().log(Level.WARNING, "Old config.yml file from folder 'Antirelog' was moved to 'AntiRelog' folder");
+                }
+
+                if (oldConfigLines != null) {
+                    String firstLine = oldConfigLines.isEmpty() ? null : oldConfigLines.get(0);
+                    File targetConfigFile = new File(newFolder, "config.yml");
+                    File backupConfigFile = new File(newFolder, "config.old.moved." + System.nanoTime() + ".yml");
+
+                    if (targetConfigFile.exists()) {
+                        Files.move(targetConfigFile.toPath(), backupConfigFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                        getLogger().info("Существующий config.yml в папке 'AntiRelog' был сохранен как: " + backupConfigFile.getName());
+                    }
+
+                    Files.write(targetConfigFile.toPath(), oldConfigLines, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+                    getLogger().info("Старый config.yml из папки 'Antirelog' был перемещен в папку 'AntiRelog'.");
                 } else {
-                    Files.write(new File(oldConfigInNewFolder.getParentFile(), "config.old." + System.nanoTime()).toPath(),
-                            oldConfigLines, StandardCharsets.UTF_8, StandardOpenOption.CREATE);
-                    getLogger().log(Level.WARNING, "Old config.yml file from folder 'Antirelog' was moved to 'AntiRelog' folder with " +
-                            "different name");
+                    getLogger().info("Старая папка 'Antirelog' была удалена, так как не содержала config.yml.");
                 }
             }
         } catch (IOException e) {
-            getLogger().log(Level.WARNING, "Something going wrong while renaming folder Antirelog -> AntiRelog", e);
+            getLogger().log(Level.WARNING, "Произошла ошибка при перемещении данных из старой папки 'Antirelog' в 'AntiRelog'", e);
         }
     }
 
@@ -167,22 +172,21 @@ public class Antirelog extends JavaPlugin {
         settings.getConfigurationProvider().reloadFileFromDisk();
         if (settings.getConfigurationProvider().isFileSuccessfullyLoaded()) {
             settings.load();
+        } else {
+            getLogger().warning("Не удалось перезагрузить файл конфигурации с диска во время reloadSettings.");
         }
+
         getServer().getScheduler().cancelTasks(this);
         if (pvpManager != null) {
             pvpManager.onPluginDisable();
             pvpManager.onPluginEnable();
         }
         if (cooldownManager != null) {
-            cooldownManager.clearAll();
+            cooldownManager.clearAllPlayerData();
         }
         if (pvpManager != null && pvpManager.getBossbarManager() != null) {
             pvpManager.getBossbarManager().createBossBars();
         }
-    }
-
-    public boolean isProtocolLibEnabled() {
-        return protocolLib;
     }
 
     public boolean isWorldguardEnabled() {
@@ -190,21 +194,26 @@ public class Antirelog extends JavaPlugin {
     }
 
     private void detectPlugins() {
-        if (Bukkit.getPluginManager().isPluginEnabled("WorldGuard")) {
-            WorldGuardWrapper.getInstance().registerEvents(this);
-            Bukkit.getPluginManager().registerEvents(new WorldGuardListener(settings, pvpManager), this);
-            worldguard = true;
+        PluginManager pluginManager = Bukkit.getPluginManager();
+        if (pluginManager.isPluginEnabled("WorldGuard")) {
+            try {
+                WorldGuardWrapper.getInstance();
+                pluginManager.registerEvents(new WorldGuardListener(settings, pvpManager), this);
+                worldguard = true;
+            } catch (Throwable e) {
+                worldguard = false;
+            }
+        } else {
+            worldguard = false;
         }
         try {
             Class.forName("net.ess3.api.events.teleport.PreTeleportEvent");
-            Bukkit.getPluginManager().registerEvents(new EssentialsTeleportListener(pvpManager, settings), this);
+            pluginManager.registerEvents(new EssentialsTeleportListener(pvpManager, settings), this);
         } catch (ClassNotFoundException e) {
-
         }
-        protocolLib = Bukkit.getPluginManager().isPluginEnabled("ProtocolLib");
     }
 
-    public Settings getSettings() {
+    public Settings getPluginSettings() {
         return settings;
     }
 
@@ -213,11 +222,11 @@ public class Antirelog extends JavaPlugin {
     }
 
     public PowerUpsManager getPowerUpsManager() {
-        return pvpManager.getPowerUpsManager();
+        return pvpManager != null ? pvpManager.getPowerUpsManager() : null;
     }
 
     public BossbarManager getBossbarManager() {
-        return pvpManager.getBossbarManager();
+        return pvpManager != null ? pvpManager.getBossbarManager() : null;
     }
 
     public CooldownManager getCooldownManager() {

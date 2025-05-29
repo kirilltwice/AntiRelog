@@ -2,7 +2,6 @@ package ru.leymooo.antirelog.listeners;
 
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event.Result;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -25,12 +24,15 @@ public class WorldGuardListener implements Listener {
         Player attacker = event.getAttacker();
         Player defender = event.getDefender();
 
+        if (attacker == null || defender == null) {
+            return;
+        }
+
         boolean attackerInPvp = isPlayerInAnyPvP(attacker);
         boolean defenderInPvp = isPlayerInAnyPvP(defender);
 
-        if (shouldCancelEvent(attackerInPvp, defenderInPvp)) {
+        if (shouldUpholdWorldGuardDisallow(attackerInPvp, defenderInPvp)) {
             event.setCancelled(true);
-            event.setResult(Result.DENY);
         }
     }
 
@@ -38,8 +40,7 @@ public class WorldGuardListener implements Listener {
         return pvpManager.isInPvP(player) || pvpManager.isInSilentPvP(player);
     }
 
-    private boolean shouldCancelEvent(boolean attackerInPvp, boolean defenderInPvp) {
-        return (attackerInPvp && defenderInPvp) ||
-                (settings.isJoinPvPInWorldGuard() && defenderInPvp);
+    private boolean shouldUpholdWorldGuardDisallow(boolean attackerInPvp, boolean defenderInPvp) {
+        return defenderInPvp && (attackerInPvp || settings.isJoinPvPInWorldGuard());
     }
 }

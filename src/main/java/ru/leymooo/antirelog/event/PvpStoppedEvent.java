@@ -18,12 +18,6 @@ public class PvpStoppedEvent extends Event {
         this.player = player;
     }
 
-    @Deprecated
-    public PvpStoppedEvent(boolean isAsync, @NotNull Player player) {
-        super(isAsync);
-        this.player = player;
-    }
-
     @NotNull
     @Override
     public HandlerList getHandlers() {

@@ -24,15 +24,6 @@ public class PvpStartedEvent extends Event {
         this.pvpStatus = pvpStatus;
     }
 
-    @Deprecated
-    public PvpStartedEvent(boolean isAsync, @NotNull Player defender, @NotNull Player attacker, int pvpTimeSeconds, @NotNull PvpPreStartEvent.PvPStatus pvpStatus) {
-        super(isAsync);
-        this.defender = defender;
-        this.attacker = attacker;
-        this.pvpTimeSeconds = pvpTimeSeconds;
-        this.pvpStatus = pvpStatus;
-    }
-
     @NotNull
     @Override
     public HandlerList getHandlers() {

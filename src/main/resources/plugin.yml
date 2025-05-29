@@ -15,7 +15,6 @@ softdepend:
   - WorldGuard
   - LibsDisguises
   - CMI
-  - ProtocolLib
 
 website: https://github.com/kirilltwice/AntiRelog
 
