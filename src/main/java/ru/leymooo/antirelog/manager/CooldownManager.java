@@ -59,6 +59,7 @@ public class CooldownManager {
         }
         for (CooldownType cooldownType : CooldownType.VALUES) {
             int configCooldownSeconds = cooldownType.getCooldown(settings);
+
             if (configCooldownSeconds > 0) {
                 long remainingMillis = getRemainingMillis(player, cooldownType);
                 if (remainingMillis > 0 && cooldownType.getMaterial() != null) {
@@ -78,7 +79,6 @@ public class CooldownManager {
                 if (cooldownEndTimes.getOrDefault(player, Map.of()).containsKey(cooldownType) && cooldownType.getMaterial() != null) {
                     player.setCooldown(cooldownType.getMaterial(), 0);
                 }
-
                 Map<CooldownType, Long> playerMap = cooldownEndTimes.get(player);
                 if (playerMap != null) {
                     playerMap.remove(cooldownType);

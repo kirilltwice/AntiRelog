@@ -58,7 +58,6 @@ public class Antirelog extends JavaPlugin {
         AntiRelogCommand commandHandler = new AntiRelogCommand(this, pvpManager);
         getCommand("antirelog").setExecutor(commandHandler);
         getCommand("antirelog").setTabCompleter(commandHandler);
-
     }
 
     @Override
