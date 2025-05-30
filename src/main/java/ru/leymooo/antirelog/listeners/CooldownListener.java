@@ -89,7 +89,10 @@ public class CooldownListener implements Listener {
 
         int cooldownTimeSeconds = settings.getEnderPearlCooldown();
         if (cooldownTimeSeconds > 0 && !pvpManager.isBypassed(player)) {
-            cooldownManager.addPlayerCooldown(player, CooldownType.ENDER_PEARL, cooldownTimeSeconds);
+            cooldownManager.startLogicalCooldown(player, CooldownType.ENDER_PEARL, cooldownTimeSeconds);
+            if (pvpManager.isInPvP(player)) {
+                player.setCooldown(Material.ENDER_PEARL, cooldownTimeSeconds * 20);
+            }
         } else if (cooldownTimeSeconds <= -1) {
             cancelEventIfInPvp(event, CooldownType.ENDER_PEARL, player);
         }
@@ -121,7 +124,7 @@ public class CooldownListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerQuit(PlayerQuitEvent event) {
-        cooldownManager.removeAllCooldowns(event.getPlayer());
+        cooldownManager.removeAllCooldownsForPlayer(event.getPlayer());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -149,7 +152,11 @@ public class CooldownListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        cooldownManager.addPlayerCooldown(player, type, cooldownTimeSeconds);
+
+        cooldownManager.startLogicalCooldown(player, type, cooldownTimeSeconds);
+        if (pvpManager.isInPvP(player) && type.getMaterial() != null) {
+            player.setCooldown(type.getMaterial(), cooldownTimeSeconds * 20);
+        }
     }
 
     private CooldownType determineCooldownType(ItemStack item) {
@@ -186,7 +193,7 @@ public class CooldownListener implements Listener {
             return false;
         }
 
-        if (!cooldownManager.hasCooldown(player, cooldownType)) {
+        if (!cooldownManager.hasLogicalCooldown(player, cooldownType)) {
             return false;
         }
 

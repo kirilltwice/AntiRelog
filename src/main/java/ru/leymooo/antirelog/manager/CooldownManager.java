@@ -20,32 +20,21 @@ public class CooldownManager {
         this.settings = settings;
     }
 
-    public void addPlayerCooldown(Player player, CooldownType type, int durationSeconds) {
+    public void startLogicalCooldown(Player player, CooldownType type, int durationSeconds) {
         if (durationSeconds <= 0 || player == null || !player.isOnline()) {
             return;
         }
         long durationMillis = durationSeconds * 1000L;
         long endTime = System.currentTimeMillis() + durationMillis;
-
         cooldownEndTimes.computeIfAbsent(player, k -> new ConcurrentHashMap<>()).put(type, endTime);
-        if (type.getMaterial() != null) {
-            player.setCooldown(type.getMaterial(), durationSeconds * 20);
-        }
     }
 
-    public void addPlayerCooldownMillis(Player player, CooldownType type, long durationMillis) {
+    public void startLogicalCooldownMillis(Player player, CooldownType type, long durationMillis) {
         if (durationMillis <= 0 || player == null || !player.isOnline()) {
             return;
         }
         long endTime = System.currentTimeMillis() + durationMillis;
         cooldownEndTimes.computeIfAbsent(player, k -> new ConcurrentHashMap<>()).put(type, endTime);
-
-        if (type.getMaterial() != null) {
-            int ticks = (int) Math.ceil(durationMillis / 50.0);
-            if (ticks > 0) {
-                player.setCooldown(type.getMaterial(), ticks);
-            }
-        }
     }
 
     public void removePlayerCooldown(Player player, CooldownType type) {
@@ -70,13 +59,7 @@ public class CooldownManager {
         }
         for (CooldownType cooldownType : CooldownType.VALUES) {
             int configCooldownSeconds = cooldownType.getCooldown(settings);
-            if (configCooldownSeconds == 0) {
-                continue;
-            }
-
-            if (configCooldownSeconds < 0) {
-                addPlayerCooldownMillis(player, cooldownType, 300_000L);
-            } else {
+            if (configCooldownSeconds > 0) {
                 long remainingMillis = getRemainingMillis(player, cooldownType);
                 if (remainingMillis > 0 && cooldownType.getMaterial() != null) {
                     player.setCooldown(cooldownType.getMaterial(), (int) Math.ceil(remainingMillis / 50.0));
@@ -92,12 +75,22 @@ public class CooldownManager {
         for (CooldownType cooldownType : CooldownType.VALUES) {
             int configCooldownSeconds = cooldownType.getCooldown(settings);
             if (configCooldownSeconds < 0) {
-                removePlayerCooldown(player, cooldownType);
+                if (cooldownEndTimes.getOrDefault(player, Map.of()).containsKey(cooldownType) && cooldownType.getMaterial() != null) {
+                    player.setCooldown(cooldownType.getMaterial(), 0);
+                }
+
+                Map<CooldownType, Long> playerMap = cooldownEndTimes.get(player);
+                if (playerMap != null) {
+                    playerMap.remove(cooldownType);
+                    if (playerMap.isEmpty()) {
+                        cooldownEndTimes.remove(player);
+                    }
+                }
             }
         }
     }
 
-    public boolean hasCooldown(Player player, CooldownType type) {
+    public boolean hasLogicalCooldown(Player player, CooldownType type) {
         Map<CooldownType, Long> playerCooldowns = cooldownEndTimes.get(player);
         if (playerCooldowns == null) {
             return false;
@@ -122,7 +115,7 @@ public class CooldownManager {
         return (int) TimeUnit.MILLISECONDS.toSeconds(getRemainingMillis(player, type));
     }
 
-    public void removeAllCooldowns(Player player) {
+    public void removeAllCooldownsForPlayer(Player player) {
         Map<CooldownType, Long> playerMap = cooldownEndTimes.remove(player);
         if (playerMap != null && player.isOnline()) {
             for (CooldownType type : playerMap.keySet()) {
