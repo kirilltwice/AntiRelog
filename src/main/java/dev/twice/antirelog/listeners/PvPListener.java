@@ -38,7 +38,7 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.projectiles.ProjectileSource;
 import dev.twice.antirelog.config.Messages;
 import dev.twice.antirelog.config.Settings;
-import dev.twice.antirelog.manager.PvPManager;
+import dev.twice.antirelog.managers.PvPManager;
 import dev.twice.antirelog.util.Utils;
 
 import java.util.List;

@@ -7,7 +7,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.codemc.worldguardwrapper.event.WrappedDisallowedPVPEvent;
 import dev.twice.antirelog.config.Settings;
-import dev.twice.antirelog.manager.PvPManager;
+import dev.twice.antirelog.managers.PvPManager;
 
 @RequiredArgsConstructor
 public class WorldGuardListener implements Listener {

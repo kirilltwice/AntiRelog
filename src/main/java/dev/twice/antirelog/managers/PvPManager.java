@@ -1,4 +1,4 @@
-package dev.twice.antirelog.manager;
+package dev.twice.antirelog.managers;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -22,11 +22,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import dev.twice.antirelog.Main;
 import dev.twice.antirelog.config.Settings;
-import dev.twice.antirelog.event.PvpPreStartEvent;
-import dev.twice.antirelog.event.PvpStartedEvent;
-import dev.twice.antirelog.event.PvpStoppedEvent;
-import dev.twice.antirelog.event.PvpTimeUpdateEvent;
-import dev.twice.antirelog.event.PvpPreStartEvent.PvPStatus;
+import dev.twice.antirelog.events.PvpPreStartEvent;
+import dev.twice.antirelog.events.PvpStartedEvent;
+import dev.twice.antirelog.events.PvpStoppedEvent;
+import dev.twice.antirelog.events.PvpTimeUpdateEvent;
+import dev.twice.antirelog.events.PvpPreStartEvent.PvPStatus;
 import org.codemc.worldguardwrapper.WorldGuardWrapper;
 import org.codemc.worldguardwrapper.region.IWrappedRegion;
 import dev.twice.antirelog.util.CommandMapUtils;

@@ -1,4 +1,4 @@
-package dev.twice.antirelog.manager;
+package dev.twice.antirelog.managers;
 
 import lombok.Getter;
 import org.bukkit.Material;
@@ -151,7 +151,7 @@ public class CooldownManager {
         GOLDEN_APPLE(Material.GOLDEN_APPLE, Settings::getGoldenAppleCooldown),
         ENC_GOLDEN_APPLE(Material.ENCHANTED_GOLDEN_APPLE, Settings::getEnchantedGoldenAppleCooldown),
         ENDER_PEARL(Material.ENDER_PEARL, Settings::getEnderPearlCooldown),
-        CHORUS(Material.CHORUS_FRUIT, Settings::getСhorusCooldown),
+        CHORUS(Material.CHORUS_FRUIT, Settings::getChorusCooldown),
         TOTEM(Material.TOTEM_OF_UNDYING, Settings::getTotemCooldown),
         FIREWORK(Material.FIREWORK_ROCKET, Settings::getFireworkCooldown);
 

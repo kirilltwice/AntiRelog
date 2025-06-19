@@ -3,6 +3,7 @@ package dev.twice.antirelog;
 import dev.rollczi.litecommands.LiteCommands;
 import dev.rollczi.litecommands.bukkit.LiteBukkitFactory;
 import dev.rollczi.litecommands.bukkit.LiteBukkitMessages;
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.PluginManager;
@@ -16,10 +17,10 @@ import dev.twice.antirelog.listeners.CooldownListener;
 import dev.twice.antirelog.listeners.EssentialsTeleportListener;
 import dev.twice.antirelog.listeners.PvPListener;
 import dev.twice.antirelog.listeners.WorldGuardListener;
-import dev.twice.antirelog.manager.BossbarManager;
-import dev.twice.antirelog.manager.CooldownManager;
-import dev.twice.antirelog.manager.PowerUpsManager;
-import dev.twice.antirelog.manager.PvPManager;
+import dev.twice.antirelog.managers.BossbarManager;
+import dev.twice.antirelog.managers.CooldownManager;
+import dev.twice.antirelog.managers.PowerUpsManager;
+import dev.twice.antirelog.managers.PvPManager;
 import dev.twice.antirelog.command.AntiRelogCommand;
 
 import java.io.File;
@@ -35,27 +36,31 @@ import java.util.logging.Level;
 import java.util.stream.Stream;
 
 public class Main extends JavaPlugin {
-    private Settings settings;
+    @Getter
+    private Settings pluginSettings;
+    @Getter
     private PvPManager pvpManager;
+    @Getter
     private CooldownManager cooldownManager;
     private CooldownListener cooldownListener;
-    private boolean worldguard;
+    @Getter
+    private boolean worldguardEnabled;
     private LiteCommands<CommandSender> liteCommands;
 
     @Override
     public void onEnable() {
         loadConfig();
 
-        this.pvpManager = new PvPManager(settings, this);
-        this.cooldownManager = new CooldownManager(settings);
+        this.pvpManager = new PvPManager(pluginSettings, this);
+        this.cooldownManager = new CooldownManager(pluginSettings);
 
         detectPlugins();
 
-        this.cooldownListener = new CooldownListener(this, cooldownManager, pvpManager, settings);
+        this.cooldownListener = new CooldownListener(this, cooldownManager, pvpManager, pluginSettings);
         this.cooldownListener.initializeListeners();
         getServer().getPluginManager().registerEvents(this.cooldownListener, this);
 
-        getServer().getPluginManager().registerEvents(new PvPListener(this, pvpManager, settings), this);
+        getServer().getPluginManager().registerEvents(new PvPListener(this, pvpManager, pluginSettings), this);
 
         this.liteCommands = LiteBukkitFactory.builder("antirelog", this)
                 .commands(new AntiRelogCommand(this, pvpManager))
@@ -80,10 +85,10 @@ public class Main extends JavaPlugin {
 
     private void loadConfig() {
         fixFolder();
-        settings = Configuration.builder(Settings.class)
+        pluginSettings = Configuration.builder(Settings.class)
                 .file(new File(getDataFolder(), "config.yml"))
                 .provider(BukkitConfigurationProvider.class).build();
-        ConfigurationProvider provider = settings.getConfigurationProvider();
+        ConfigurationProvider provider = pluginSettings.getConfigurationProvider();
         provider.reloadFileFromDisk();
         File file = provider.getConfigFile();
         if (file.exists() && provider.get("config-version") == null) {
@@ -96,25 +101,25 @@ public class Main extends JavaPlugin {
             provider.reloadFileFromDisk();
         }
         if (!file.exists()) {
-            settings.save();
-            settings.loaded();
+            pluginSettings.save();
+            pluginSettings.loaded();
             getLogger().info("config.yml успешно создан.");
         } else if (provider.isFileSuccessfullyLoaded()) {
-            if (settings.load()) {
+            if (pluginSettings.load()) {
                 Object configVersionObj = provider.get("config-version");
                 String configVersionOnDisk = configVersionObj instanceof String ? (String) configVersionObj : null;
-                if (configVersionOnDisk == null || !configVersionOnDisk.equals(settings.getConfigVersion())) {
+                if (configVersionOnDisk == null || !configVersionOnDisk.equals(pluginSettings.getConfigVersion())) {
                     getLogger().info("Конфигурация была обновлена. Проверьте новые значения.");
-                    settings.save();
+                    pluginSettings.save();
                 }
                 getLogger().info("Конфигурация успешно загружена.");
             } else {
                 getLogger().warning("Не удалось загрузить конфигурацию. Используются значения по умолчанию.");
-                settings.loaded();
+                pluginSettings.loaded();
             }
         } else {
             getLogger().warning("Не удалось загрузить настройки из файла (возможно, он поврежден), используются значения по умолчанию...");
-            settings.loaded();
+            pluginSettings.loaded();
         }
     }
 
@@ -172,9 +177,9 @@ public class Main extends JavaPlugin {
     }
 
     public void reloadSettings() {
-        settings.getConfigurationProvider().reloadFileFromDisk();
-        if (settings.getConfigurationProvider().isFileSuccessfullyLoaded()) {
-            settings.load();
+        pluginSettings.getConfigurationProvider().reloadFileFromDisk();
+        if (pluginSettings.getConfigurationProvider().isFileSuccessfullyLoaded()) {
+            pluginSettings.load();
         } else {
             getLogger().warning("Не удалось перезагрузить файл конфигурации с диска во время reloadSettings.");
         }
@@ -192,36 +197,31 @@ public class Main extends JavaPlugin {
         }
     }
 
-    public boolean isWorldguardEnabled() {
-        return worldguard;
-    }
-
     private void detectPlugins() {
         PluginManager pluginManager = Bukkit.getPluginManager();
-        if (pluginManager.isPluginEnabled("WorldGuard")) {
-            try {
-                WorldGuardWrapper.getInstance();
-                pluginManager.registerEvents(new WorldGuardListener(settings, pvpManager), this);
-                worldguard = true;
-            } catch (Throwable e) {
-                worldguard = false;
-            }
-        } else {
-            worldguard = false;
+
+        worldguardEnabled = initializeWorldGuard(pluginManager);
+        initializeEssentials(pluginManager);
+    }
+
+    private boolean initializeWorldGuard(PluginManager pluginManager) {
+        if (!pluginManager.isPluginEnabled("WorldGuard")) {
+            return false;
         }
+
         try {
-            Class.forName("net.ess3.api.events.teleport.PreTeleportEvent");
-            pluginManager.registerEvents(new EssentialsTeleportListener(pvpManager, settings), this);
-        } catch (ClassNotFoundException e) {
+            WorldGuardWrapper.getInstance();
+            pluginManager.registerEvents(new WorldGuardListener(pluginSettings, pvpManager), this);
+            return true;
+        } catch (Throwable ignored) {
+            return false;
         }
     }
 
-    public Settings getPluginSettings() {
-        return settings;
-    }
-
-    public PvPManager getPvpManager() {
-        return pvpManager;
+    private void initializeEssentials(PluginManager pluginManager) {
+        if (pluginManager.isPluginEnabled("Essentials")) {
+            pluginManager.registerEvents(new EssentialsTeleportListener(pvpManager, pluginSettings), this);
+        }
     }
 
     public PowerUpsManager getPowerUpsManager() {
@@ -230,9 +230,5 @@ public class Main extends JavaPlugin {
 
     public BossbarManager getBossbarManager() {
         return pvpManager != null ? pvpManager.getBossbarManager() : null;
-    }
-
-    public CooldownManager getCooldownManager() {
-        return cooldownManager;
     }
 }

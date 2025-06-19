@@ -1,4 +1,4 @@
-package dev.twice.antirelog.event;
+package dev.twice.antirelog.events;
 
 import lombok.Getter;
 import org.bukkit.entity.Player;

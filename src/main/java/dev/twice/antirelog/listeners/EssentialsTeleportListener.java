@@ -7,7 +7,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import dev.twice.antirelog.config.Settings;
-import dev.twice.antirelog.manager.PvPManager;
+import dev.twice.antirelog.managers.PvPManager;
 
 @RequiredArgsConstructor
 public class EssentialsTeleportListener implements Listener {

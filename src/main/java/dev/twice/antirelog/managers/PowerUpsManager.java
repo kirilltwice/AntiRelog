@@ -1,4 +1,4 @@
-package dev.twice.antirelog.manager;
+package dev.twice.antirelog.managers;
 
 import com.Zrips.CMI.CMI;
 import com.Zrips.CMI.Containers.CMIUser;

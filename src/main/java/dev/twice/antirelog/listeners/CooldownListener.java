@@ -18,11 +18,11 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import dev.twice.antirelog.config.Settings;
-import dev.twice.antirelog.event.PvpStartedEvent;
-import dev.twice.antirelog.event.PvpStoppedEvent;
-import dev.twice.antirelog.manager.CooldownManager;
-import dev.twice.antirelog.manager.CooldownManager.CooldownType;
-import dev.twice.antirelog.manager.PvPManager;
+import dev.twice.antirelog.events.PvpStartedEvent;
+import dev.twice.antirelog.events.PvpStoppedEvent;
+import dev.twice.antirelog.managers.CooldownManager;
+import dev.twice.antirelog.managers.CooldownManager.CooldownType;
+import dev.twice.antirelog.managers.PvPManager;
 import dev.twice.antirelog.util.Utils;
 
 import java.util.EnumMap;

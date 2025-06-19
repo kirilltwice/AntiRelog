@@ -10,7 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import dev.twice.antirelog.Main;
-import dev.twice.antirelog.manager.PvPManager;
+import dev.twice.antirelog.managers.PvPManager;
 import dev.twice.antirelog.util.Utils;
 
 @Command(name = "antirelog")

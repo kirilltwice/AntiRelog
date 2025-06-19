@@ -12,7 +12,7 @@ import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import dev.twice.antirelog.config.Settings;
-import dev.twice.antirelog.manager.PvPManager;
+import dev.twice.antirelog.managers.PvPManager;
 import dev.twice.antirelog.util.Utils;
 
 @RequiredArgsConstructor
