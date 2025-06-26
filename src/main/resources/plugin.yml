@@ -1,0 +1,19 @@
+name: AntiRelog
+main: dev.twice.antirelog.Main
+
+authors: [ Twice, Leymooo ]
+prefix: AntiRelog
+
+version: ${version}
+api-version: 1.21
+
+softdepend:
+  - Essentials
+  - SuperVanish
+  - PremiumVanish
+  - VanishNoPacket
+  - WorldGuard
+  - LibsDisguises
+  - CMI
+
+website: https://github.com/kirilltwice/AntiRelog

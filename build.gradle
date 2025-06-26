@@ -1,0 +1,110 @@
+plugins {
+    id 'java'
+    id("com.gradleup.shadow") version "9.0.0-beta17"
+}
+
+group = 'dev.twice'
+archivesBaseName = 'antirelog'
+version = '1.0.1'
+description = 'AntiRelog'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+compileJava {
+    options.encoding = 'UTF-8'
+    options.compilerArgs += ['-Xlint:all', '-Xlint:-options', '-parameters']
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'papermc-repo'
+        url = 'https://repo.papermc.io/repository/maven-public/'
+    }
+    maven {
+        name = 'sonatype'
+        url = 'https://oss.sonatype.org/content/groups/public/'
+    }
+    maven {
+        name = 'ess-repo'
+        url = 'https://repo.essentialsx.net/releases/'
+    }
+    maven {
+        name = 'codemc-repo'
+        url = 'https://repo.codemc.org/repository/maven-public/'
+    }
+    maven {
+        name = 'cubekrowd-repo'
+        url = 'https://mavenrepo.cubekrowd.net/repository/public/'
+    }
+    maven {
+        name = 'md_5-public'
+        url = 'https://repo.md-5.net/content/groups/public/'
+    }
+    maven {
+        name = 'jitpack'
+        url = 'https://jitpack.io'
+    }
+    maven {
+        name = 'reposilite-repository-releases'
+        url = 'https://repo.panda-lang.org/releases'
+    }
+}
+
+dependencies {
+    compileOnly("io.papermc.paper:paper-api:1.21.4-R0.1-SNAPSHOT")
+    compileOnly("org.projectlombok:lombok:1.18.38")
+    annotationProcessor("org.projectlombok:lombok:1.18.38")
+    compileOnly('net.essentialsx:EssentialsX:2.21.1') {
+        exclude group: 'org.spigotmc', module: 'spigot-api'
+    }
+    compileOnly('com.github.LeonMangler:SuperVanish:6.2.19') {
+        exclude group: 'org.spigotmc', module: 'spigot'
+        exclude group: 'org.spigotmc', module: 'spigot-api'
+    }
+    compileOnly('me.libraryaddict.disguises:libsdisguises:11.0.0') {
+        exclude group: 'org.spigotmc', module: 'spigot-api'
+    }
+    compileOnly('com.github.Zrips:CMI-API:9.7.14.3') {
+        exclude group: 'org.spigotmc', module: 'spigot-api'
+    }
+    implementation 'com.github.Leymooo:AnnotatedYAMLConfiguration:2cbe5f9fa3'
+    implementation 'org.codemc.worldguardwrapper:worldguardwrapper:1.2.1-SNAPSHOT'
+    implementation 'dev.rollczi:litecommands-bukkit:3.9.7'
+}
+
+processResources {
+    inputs.property('version', project.version)
+
+    filesMatching(['**/*.yml', '**/*.yaml', '**/*.json']) {
+        expand('version': project.version)
+    }
+}
+
+shadowJar {
+    archiveClassifier = ''
+
+    relocate 'org.codemc.worldguardwrapper', 'dev.twice.antirelog.libs.worldguardwrapper'
+    relocate 'ru.leymooo.annotatedyaml', 'dev.twice.antirelog.libs.annotatedyaml'
+    relocate 'dev.rollczi', 'dev.twice.antirelog.libs.litecommands'
+
+    exclude 'META-INF/*.SF'
+    exclude 'META-INF/*.DSA'
+    exclude 'META-INF/*.RSA'
+    exclude 'META-INF/DEPENDENCIES'
+    exclude 'META-INF/LICENSE*'
+    exclude 'META-INF/NOTICE*'
+    exclude 'META-INF/maven/**'
+}
+
+build {
+    dependsOn shadowJar
+}
+
+jar {
+    enabled = false
+}
