@@ -14,7 +14,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="AntiRelog.main" options="-Xlint:all -Xlint:-options -parameters" />
+      <module name="AntiRelog.main" options="-Xlint:all -Xlint:-options -Xlint:-processing -parameters" />
     </option>
   </component>
 </project>

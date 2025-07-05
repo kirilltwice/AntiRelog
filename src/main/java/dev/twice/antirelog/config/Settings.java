@@ -8,7 +8,6 @@ import ru.leymooo.annotatedyaml.Annotations.*;
 import ru.leymooo.annotatedyaml.Configuration;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -20,191 +19,230 @@ public final class Settings extends Configuration {
 
     @Final
     @Key("config-version")
-    String configVersion = "1.7";
+    String configVersion = "2.0";
 
+    @Comment("Настройки всех текстовых сообщений плагина")
     Messages messages = new Messages();
 
-    @Comment("Кулдавн для обычных золотых яблок во время пвп")
-    @Key("golden-apple-cooldown")
-    int goldenAppleCooldown = 30;
+    @Key("combat-time")
+    @Comment("Время боевого режима в секундах")
+    int combatTime = 12;
 
-    @Comment({
-            "Кулдавн для зачарованных золотых яблок во время пвп",
-            "Значение 0 отключает кулдаун; -1 отключает использование во время пвп"
-    })
-    @Key("enchanted-golden-apple-cooldown")
-    int enchantedGoldenAppleCooldown = 60;
+    @Key("disable-commands-in-combat")
+    @Comment("Запретить использование команд в боевом режиме")
+    boolean disableCommandsInCombat = true;
 
-    @Comment({
-            "Кулдавн для жемчугов края во время пвп",
-            "Значение 0 отключает кулдаун; -1 отключает использование во время пвп"
-    })
-    @Key("ender-pearl-cooldown")
-    int enderPearlCooldown = 15;
-
-    @Comment({
-            "Кулдавн для корусов во время пвп",
-            "https://minecraft-ru.gamepedia.com/Плод_коруса",
-            "Значение 0 отключает кулдаун; -1 отключает использование во время пвп"
-    })
-    @Key("chorus-cooldown")
-    int chorusCooldown = 7;
-
-    @Comment({
-            "Кулдавн для фейверков во время пвп (чтобы не убегали на элитрах)",
-            "Значение 0 отключает кулдаун; -1 отключает использование во время пвп"
-    })
-    @Key("firework-cooldown")
-    int fireworkCooldown = 60;
-
-    @Comment({
-            "Кулдавн для тотемов бесмертия во время пвп",
-            "Значение 0 отключает кулдаун; -1 отключает использование во время пвп"
-    })
-    @Key("totem-cooldown")
-    int totemCooldown = 60;
-
-    @Comment("Длительность пвп")
-    @Key("pvp-time")
-    int pvpTime = 12;
-
-    @Comment("Отключить ли возможность писать команды в пвп?")
-    @Key("disable-commands-in-pvp")
-    boolean disableCommandsInPvp = true;
-
-    @Comment({
-            "Команды которые можно писать во время пвп",
-            "Команды писать без '/' (кол-во '/' - 1)",
-            "Плагин будет пытаться сам определить алиасы для команд (msg,tell,m)",
-            "но для некоторых команд возможно придется самому прописать алиасы"
-    })
     @Key("commands-whitelist")
+    @Comment("Список команд, разрешенных в боевом режиме (без /)")
     List<String> whiteListedCommands = List.of();
 
-    @Key("cancel-interact-with-entities")
-    @Comment("Отменять ли взаимодействие с энтити во время пвп")
-    boolean cancelInteractWithEntities = false;
-
-    @Comment("Убивать ли игрока если он вышел во время пвп?")
     @Key("kill-on-leave")
+    @Comment("Убивать игрока при выходе из игры в боевом режиме")
     boolean killOnLeave = true;
 
-    @Comment("Убивать ли игрока если его кикнули во время пвп?")
     @Key("kill-on-kick")
+    @Comment("Убивать игрока при кике в боевом режиме")
     boolean killOnKick = true;
 
-    @Comment("Выполнять ли команды, если игрока кикнули во время пвп?")
     @Key("run-commands-on-kick")
+    @Comment("Выполнять команды при кике в боевом режиме")
     boolean runCommandsOnKick = true;
 
-    @Comment({
-            "Какой текст должен быть в причине кика, чтобы его убило/выполнились команды",
-            "Если пусто, то будет убивать/выполняться команды всегда"
-    })
-    @Key("kick-messages")
-    List<String> kickMessages = List.of("спам", "реклама", "анти-чит");
-
-    @Comment("Какие команды запускать от консоли при выходе игрока во время пвп?")
     @Key("commands-on-leave")
+    @Comment("Команды, выполняемые при выходе в боевом режиме")
     List<String> commandsOnLeave = List.of();
 
-    @Comment("Отключать ли у игрока который ударил FLY, GM, GOD, VANISH?")
+    @Key("golden-apple-cooldown")
+    @Comment("Кулдаун золотых яблок в секундах (0 = отключен, -1 = запрещен в бою)")
+    int goldenAppleCooldown = 30;
+
+    @Key("enchanted-golden-apple-cooldown")
+    @Comment("Кулдаун зачарованных золотых яблок в секундах")
+    int enchantedGoldenAppleCooldown = 60;
+
+    @Key("ender-pearl-cooldown")
+    @Comment("Кулдаун жемчуга Края в секундах")
+    int enderPearlCooldown = 15;
+
+    @Key("chorus-cooldown")
+    @Comment("Кулдаун плода коруса в секундах")
+    int chorusCooldown = 7;
+
+    @Key("firework-cooldown")
+    @Comment("Кулдаун фейерверков в секундах (против элитр)")
+    int fireworkCooldown = 60;
+
+    @Key("totem-cooldown")
+    @Comment("Кулдаун тотемов бессмертия в секундах")
+    int totemCooldown = 60;
+
     @Key("disable-powerups")
+    @Comment("Отключать ли усиления (креатив, полет, ванише) при входе в бой")
     boolean disablePowerups = true;
 
-    @Comment({
-            "Какие команды выполнять, если были отключены усиления у игрока",
-            "Данную настройку можно использовать например для того,",
-            "чтобы наложить на игрока отрицательный эффект, если он начал пвп в ГМ/ФЛАЕ/и тд"
-    })
     @Key("commands-on-powerups-disable")
+    @Comment("Команды, выполняемые при отключении усилений")
     List<String> commandsOnPowerupsDisable = List.of();
 
-    @Comment("Отключать ли возможность телепортироваться во время пвп?")
-    @Key("disable-teleports-in-pvp")
-    boolean disableTeleportsInPvp = true;
+    @Key("disable-teleports-in-combat")
+    @Comment("Запретить телепортацию в боевом режиме")
+    boolean disableTeleportsInCombat = true;
 
-    @Comment("Игнорировать ли PVP deny во время пвп между игроками?")
+    @Key("disable-enderchest-in-combat")
+    @Comment("Запретить использование сундука Края в боевом режиме")
+    boolean disableEnderchestInCombat = true;
+
+    @Key("cancel-interact-with-entities")
+    @Comment("Отменять взаимодействие с сущностями в боевом режиме")
+    boolean cancelInteractWithEntities = false;
+
+    @Key("max-teleport-distance")
+    @Comment("Максимальное расстояние телепортации в блоках")
+    int maxTeleportDistance = 10;
+
     @Key("ignore-worldguard")
+    @Comment("Игнорировать запрет PvP от WorldGuard для игроков в бою")
     boolean ignoreWorldGuard = true;
 
-    @Comment({
-            "Включать ли игроку, который не участвует в пвп и ударил другого игрока в pvp, pvp режим",
-            "Если два игрока дерутся на территории где PVP deny и их ударить,",
-            "то у того кто ударил также включится PVP режим"
-    })
-    @Key("join-pvp-in-worldguard")
-    boolean joinPvPInWorldGuard = false;
+    @Key("join-combat-in-worldguard")
+    @Comment("Включать боевой режим при ударе в зоне с запретом PvP")
+    boolean joinCombatInWorldGuard = false;
 
-    @Comment("В каких регионах не будет работать плагин")
     @Key("ignored-worldguard-regions")
+    @Comment("Регионы WorldGuard, где плагин не работает")
     List<String> ignoredWgRegions = List.of();
 
-    @Ignore
-    Set<String> ignoredWgRegionsCache = ConcurrentHashMap.newKeySet();
+    @Key("disable-combat-in-ignored-region")
+    @Comment("Отключать боевой режим при входе в игнорируемый регион")
+    boolean disableCombatInIgnoredRegion = false;
 
-    @Comment("Отключать ли активный ПВП режим когда игрок заходит в игнорируемый регион?")
-    @Key("disable-pvp-in-ignored-region")
-    boolean disablePvpInIgnoredRegion = false;
-
-    @Comment("Скрывать ли сообщения о заходе игроков?")
-    @Key("hide-join-message")
-    boolean hideJoinMessage = false;
-
-    @Comment("Скрывать ли сообщения о выходе игроков?")
-    @Key("hide-leave-message")
-    boolean hideLeaveMessage = false;
-
-    @Comment("Скрывать ли сообщение о смерти игроков?")
-    @Key("hide-death-message")
-    boolean hideDeathMessage = false;
-
-    @Comment("Отключать ли Эндер-сундук во время пвп?")
-    @Key("disable-enderchest-in-pvp")
-    boolean disableEnderchestInPvp = true;
-
-    @Comment("Миры в которых плагин не работает")
     @Key("disabled-worlds")
+    @Comment("Миры, где плагин не работает")
     List<String> disabledWorlds = List.of("world1", "world2");
 
-    @Ignore
-    Set<String> disabledWorldsCache = ConcurrentHashMap.newKeySet();
+    @Key("hide-join-message")
+    @Comment("Скрывать сообщения о входе игроков")
+    boolean hideJoinMessage = false;
 
-    @Override
-    public void loaded() {
-        this.ignoredWgRegionsCache = ConcurrentHashMap.newKeySet();
-        this.disabledWorldsCache = ConcurrentHashMap.newKeySet();
+    @Key("hide-leave-message")
+    @Comment("Скрывать сообщения о выходе игроков")
+    boolean hideLeaveMessage = false;
 
-        ignoredWgRegions.parallelStream()
-                .map(String::toLowerCase)
-                .forEach(ignoredWgRegionsCache::add);
+    @Key("hide-death-message")
+    @Comment("Скрывать сообщения о смерти игроков")
+    boolean hideDeathMessage = false;
 
-        disabledWorlds.parallelStream()
-                .map(String::toLowerCase)
-                .forEach(disabledWorldsCache::add);
+    @Key("kick-messages")
+    @Comment("Причины кика, при которых игрок будет убит/наказан")
+    List<String> kickMessages = List.of("спам", "реклама", "анти-чит");
+
+    @Key("teleport-grace-period-ticks")
+    @Comment("Время задержки телепортации в тиках")
+    int teleportGracePeriodTicks = 5;
+
+    @Key("max-damager-search-depth")
+    @Comment("Максимальная глубина поиска атакующего")
+    int maxDamagerSearchDepth = 10;
+
+    @Key("bossbar-enabled")
+    @Comment("Включить отображение боссбара в боевом режиме")
+    boolean bossbarEnabled = true;
+
+    @Key("bossbar-color")
+    @Comment("Цвет боссбара: RED, BLUE, GREEN, YELLOW, PINK, PURPLE, WHITE")
+    String bossbarColor = "RED";
+
+    @Key("bossbar-style")
+    @Comment("Стиль боссбара: SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, SEGMENTED_20")
+    String bossbarStyle = "SOLID";
+
+    @Key("bossbar-title")
+    @Comment("Текст боссбара с поддержкой цветов (&a, &b) и плейсхолдеров (%time%, %formated-sec%)")
+    String bossbarTitle = "&r&lРежим &c&lCOMBAT &r&l- &a&l%time% &r&l%formated-sec%.";
+
+    @Key("scoreboard-enabled")
+    @Comment("Включить отображение скорборда в боевом режиме (требует плагин TAB)")
+    boolean scoreboardEnabled = false;
+
+    @Key("scoreboard-provider")
+    @Comment("Провайдер скорборда: TAB")
+    String scoreboardProvider = "TAB";
+
+    @Key("scoreboard-title")
+    @Comment("Заголовок скорборда с поддержкой цветов")
+    String scoreboardTitle = "&cРежим боя";
+
+    @Key("scoreboard-lines")
+    @Comment("Строки скорборда. Используйте {time} для времени, {opponents} для списка противников")
+    List<String> scoreboardLines = List.of(
+            "",
+            "&fПодождите &c{time}",
+            "&fПеред выходом с сервера",
+            "",
+            "&cПротивники:",
+            "{opponents}",
+            ""
+    );
+
+    @Key("scoreboard-opponent")
+    @Comment("Формат отображения противника. {player} - имя, {health} - здоровье, {ping} - пинг")
+    String scoreboardOpponent = "&f{player} &c{health}❤ &9{ping}⇄";
+
+    @Key("scoreboard-empty")
+    @Comment("Сообщение, когда нет противников")
+    String scoreboardEmpty = "&7Отсутствуют";
+
+    public BossbarConfig getBossbar() {
+        return new BossbarConfig(bossbarEnabled, bossbarColor, bossbarStyle, bossbarTitle);
     }
 
-    public Set<String> getIgnoredWgRegions() {
-        return Set.copyOf(ignoredWgRegionsCache);
+    public ScoreboardConfig getScoreboard() {
+        return new ScoreboardConfig(scoreboardEnabled, scoreboardProvider, scoreboardTitle,
+                scoreboardLines, scoreboardOpponent, scoreboardEmpty);
     }
 
-    public Set<String> getDisabledWorlds() {
-        return Set.copyOf(disabledWorldsCache);
+    public static class BossbarConfig {
+        private final boolean enabled;
+        private final String color;
+        private final String style;
+        private final String title;
+
+        public BossbarConfig(boolean enabled, String color, String style, String title) {
+            this.enabled = enabled;
+            this.color = color;
+            this.style = style;
+            this.title = title;
+        }
+
+        public boolean isEnabled() { return enabled; }
+        public String getColor() { return color; }
+        public String getStyle() { return style; }
+        public String getTitle() { return title; }
     }
 
-    public boolean isWorldDisabled(String worldName) {
-        return disabledWorldsCache.contains(worldName.toLowerCase());
-    }
+    public static class ScoreboardConfig {
+        private final boolean enabled;
+        private final String provider;
+        private final String title;
+        private final List<String> lines;
+        private final String opponent;
+        private final String empty;
 
-    public boolean isRegionIgnored(String regionName) {
-        return ignoredWgRegionsCache.contains(regionName.toLowerCase());
-    }
+        public ScoreboardConfig(boolean enabled, String provider, String title,
+                                List<String> lines, String opponent, String empty) {
+            this.enabled = enabled;
+            this.provider = provider;
+            this.title = title;
+            this.lines = lines;
+            this.opponent = opponent;
+            this.empty = empty;
+        }
 
-    public boolean isItemCooldownDisabled(int cooldown) {
-        return cooldown == -1;
-    }
-
-    public boolean isItemCooldownEnabled(int cooldown) {
-        return cooldown > 0;
+        public boolean isEnabled() { return enabled; }
+        public String getProvider() { return provider; }
+        public String getTitle() { return title; }
+        public List<String> getLines() { return lines; }
+        public String getOpponent() { return opponent; }
+        public String getEmpty() { return empty; }
     }
 }

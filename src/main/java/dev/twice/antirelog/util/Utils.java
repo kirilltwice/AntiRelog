@@ -3,7 +3,6 @@ package dev.twice.antirelog.util;
 import lombok.experimental.UtilityClass;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import org.bukkit.ChatColor;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -12,7 +11,8 @@ import java.util.regex.Pattern;
 public class Utils {
 
     private static final LegacyComponentSerializer LEGACY_SERIALIZER =
-            LegacyComponentSerializer.legacySection();
+            LegacyComponentSerializer.legacyAmpersand();
+
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
 
     public String color(String message) {
@@ -21,7 +21,7 @@ public class Utils {
         }
 
         message = translateHexCodes(message);
-        return ChatColor.translateAlternateColorCodes('&', message);
+        return message;
     }
 
     public Component colorize(String message) {
@@ -29,21 +29,55 @@ public class Utils {
             return Component.empty();
         }
 
-        return LEGACY_SERIALIZER.deserialize(color(message));
+        message = translateHexCodes(message);
+        return LEGACY_SERIALIZER.deserialize(message);
     }
 
     private String translateHexCodes(String message) {
         Matcher matcher = HEX_PATTERN.matcher(message);
-        StringBuilder buffer = new StringBuilder(message.length() + 4 * 8);
+        StringBuilder buffer = new StringBuilder(message.length() + 32);
 
         while (matcher.find()) {
-            String group = matcher.group(1);
-            matcher.appendReplacement(buffer, "§x§" + group.charAt(0) + "§" + group.charAt(1) +
-                    "§" + group.charAt(2) + "§" + group.charAt(3) + "§" + group.charAt(4) + "§" + group.charAt(5));
+            String hexColor = matcher.group(1);
+            String replacement = "<#" + hexColor + ">";
+            matcher.appendReplacement(buffer, replacement);
         }
 
         matcher.appendTail(buffer);
         return buffer.toString();
+    }
+
+    public String stripColor(String message) {
+        if (message == null || message.isEmpty()) {
+            return message;
+        }
+
+        message = message.replaceAll("&[0-9a-fk-or]", "");
+        message = message.replaceAll("&#[0-9A-Fa-f]{6}", "");
+        message = message.replaceAll("<#[0-9A-Fa-f]{6}>", "");
+
+        return message;
+    }
+
+    public String getPlainText(String message) {
+        if (message == null || message.isEmpty()) {
+            return message;
+        }
+
+        Component component = colorize(message);
+        return LegacyComponentSerializer.builder()
+                .character('&')
+                .extractUrls()
+                .build()
+                .serialize(component.asComponent());
+    }
+
+    public boolean hasColors(String message) {
+        if (message == null || message.isEmpty()) {
+            return false;
+        }
+
+        return message.contains("&");
     }
 
     public String formatTimeUnit(String base, String singular, String few, String many, int number) {
@@ -98,5 +132,23 @@ public class Utils {
 
     public Component formatDurationComponent(int seconds) {
         return colorize(formatDuration(seconds));
+    }
+
+    public String applyGradient(String text, String startColor, String endColor) {
+        if (text == null || text.isEmpty()) {
+            return text;
+        }
+
+        if (text.length() <= 1) {
+            return startColor + text;
+        }
+
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < text.length(); i++) {
+            String color = (i % 2 == 0) ? startColor : endColor;
+            result.append(color).append(text.charAt(i));
+        }
+
+        return result.toString();
     }
 }

@@ -26,7 +26,7 @@ public class PowerUpsManager {
     private Object vanishNoPacketPluginInstance;
     private Object essentialsPluginInstance;
 
-    {
+    public void initialize() {
         detectPlugins();
     }
 
@@ -56,11 +56,14 @@ public class PowerUpsManager {
                 .forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
                         command.replace("%player%", playerName)));
 
-        String message = settings.getMessages().getPvpStartedWithPowerups();
+        String message = settings.getMessages().getCombatStartedWithPowerups();
         if (message != null && !message.isEmpty() && player.isOnline()) {
-            Component component = LegacyComponentSerializer.legacySection().deserialize(Utils.color(message));
-            player.sendMessage(component);
+            player.sendMessage(Utils.colorize(message));
         }
+    }
+
+    public String getPvpStartedWithPowerups() {
+        return settings.getMessages().getCombatStartedWithPowerups();
     }
 
     public void detectPlugins() {

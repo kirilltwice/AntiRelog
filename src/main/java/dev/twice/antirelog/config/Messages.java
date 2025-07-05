@@ -11,55 +11,109 @@ import static lombok.AccessLevel.PRIVATE;
 @Data
 @NoArgsConstructor
 @FieldDefaults(level = PRIVATE)
-@Comment("Для отключения сообщения оставьте его пустым")
 public final class Messages implements ConfigurationSection {
 
-    @Key("pvp-started")
-    String pvpStarted = "&bВы начали &e&lPVP&b!";
+    @Key("no-permission")
+    @Comment("Сообщение при отсутствии прав")
+    String noPermission = "&cУ вас нет прав для использования этой команды";
 
-    @Key("pvp-started-title")
-    String pvpStartedTitle = "&bAntiRelog";
+    @Key("player-not-found")
+    @Comment("Сообщение когда игрок не найден")
+    String playerNotFound = "&cИгрок не найден";
 
-    @Key("pvp-started-subtitle")
-    String pvpStartedSubtitle = "Вы вошли в режим &ePVP&a!";
+    @Key("invalid-usage")
+    @Comment("Сообщение при неправильном использовании команды")
+    String invalidUsage = "&cНеправильное использование команды";
 
-    @Key("pvp-stopped")
-    String pvpStopped = "&e&lPVP &bокончено";
+    @Key("combat-started")
+    @Comment("Сообщение при входе в боевой режим")
+    String combatStarted = "&bВы начали &e&lCOMBAT&b!";
 
-    @Key("pvp-stopped-title")
-    String pvpStoppedTitle = "&bAntiRelog";
+    @Key("combat-stopped")
+    @Comment("Сообщение при выходе из боевого режима")
+    String combatStopped = "&e&lCOMBAT &bокончено";
 
-    @Key("pvp-stopped-subtitle")
-    String pvpStoppedSubtitle = "Вы вышли из режима &ePVP&a!";
+    @Key("combat-left")
+    @Comment("Сообщение всем игрокам когда кто-то вышел в бою. %player% - имя игрока")
+    String combatLeft = "&aИгрок &c&l%player% &aпокинул игру во время &b&lCOMBAT&a и был наказан.";
 
-    @Key("pvp-stopped-actionbar")
-    String pvpStoppedActionbar = "&e&lPVP &aокончено, Вы снова можете использовать команды и выходить из игры!";
+    @Key("combat-started-title")
+    @Comment("Заголовок титра при входе в бой")
+    String combatStartedTitle = "&bAntiRelog";
 
-    @Key("in-pvp-bossbar")
-    String inPvpBossbar = "&r&lРежим &c&lPVP &r&l- &a&l%time% &r&l%formated-sec%.";
+    @Key("combat-started-subtitle")
+    @Comment("Подзаголовок титра при входе в бой")
+    String combatStartedSubtitle = "Вы вошли в режим &eCOMBAT&a!";
 
-    @Key("in-pvp-actionbar")
-    String inPvpActionbar = "&r&lРежим &c&lPVP&r&l, не выходите из игры &a&l%time% &r&l%formated-sec%.";
+    @Key("combat-stopped-title")
+    @Comment("Заголовок титра при выходе из боя")
+    String combatStoppedTitle = "&bAntiRelog";
 
-    @Key("pvp-leaved")
-    String pvpLeaved = "&aИгрок &c&l%player% &aпокинул игру во время &b&lПВП&a и был наказан.";
+    @Key("combat-stopped-subtitle")
+    @Comment("Подзаголовок титра при выходе из боя")
+    String combatStoppedSubtitle = "Вы вышли из режима &eCOMBAT&a!";
+
+    @Key("in-combat-actionbar")
+    @Comment("Текст в экшн баре во время боя. %time% - время, %formated-sec% - секунды")
+    String inCombatActionbar = "&r&lРежим &c&lCOMBAT&r&l, не выходите из игры &a&l%time% &r&l%formated-sec%.";
+
+    @Key("combat-stopped-actionbar")
+    @Comment("Текст в экшн баре при окончании боя")
+    String combatStoppedActionbar = "&e&lCOMBAT &aокончено, Вы снова можете использовать команды и выходить из игры!";
 
     @Key("commands-disabled")
-    String commandsDisabled = "&b&lВы не можете использовать команды в &e&lPvP&b&l. &b&lПодождите &a&l%time% &b&l%formated-sec%.";
+    @Comment("Сообщение при попытке использовать команду в бою")
+    String commandsDisabled = "&b&lВы не можете использовать команды в &e&lCombat&b&l. &b&lПодождите &a&l%time% &b&l%formated-sec%.";
+
+    @Key("item-disabled-in-combat")
+    @Comment("Сообщение при попытке использовать запрещенный предмет в бою")
+    String itemDisabledInCombat = "&b&lВы не можете использовать этот предмет в &e&lCOMBAT &b&lрежиме";
 
     @Key("item-cooldown")
+    @Comment("Сообщение о кулдауне предмета. %time% - время ожидания")
     String itemCooldown = "&b&lВы сможете использовать этот предмет через &a&l%time% &b&l%formated-sec%.";
 
-    @Key("item-disabled-in-pvp")
-    String itemDisabledInPvp = "&b&lВы не можете использовать этот предмет в &e&lPVP &b&lрежиме";
-
     @Key("totem-cooldown")
+    @Comment("Сообщение о кулдауне тотема")
     String totemCooldown = "&b&lТотем не был использован, т.к был недавно использован. Тотем будет доступен через &a&l%time% &b&l%formated-sec%.";
 
-    @Key("totem-disabled-in-pvp")
-    String totemDisabledInPvp = "&b&lТотем не был использован, т.к он отключен в &e&lPVP &b&lрежиме";
+    @Key("totem-disabled-in-combat")
+    @Comment("Сообщение при запрете тотема в бою")
+    String totemDisabledInCombat = "&b&lТотем не был использован, т.к он отключен в &e&lCOMBAT &b&lрежиме";
 
-    @Key("pvp-started-with-powerups")
-    @Comment("Сообщение появляется при включенной функции 'commands-on-powerups-disable'")
-    String pvpStartedWithPowerups = "&c&lВы начали пвп с включенным GM/FLY/и тд и за это получили негативный эффект";
+    @Key("combat-started-with-powerups")
+    @Comment("Сообщение при входе в бой с активными усилениями")
+    String combatStartedWithPowerups = "&c&lВы начали combat с включенным GM/FLY/и тд и за это получили негативный эффект";
+
+    @Key("title-fade-in")
+    @Comment("Время появления титра в миллисекундах")
+    int titleFadeIn = 500;
+
+    @Key("title-stay")
+    @Comment("Время показа титра в миллисекундах")
+    int titleStay = 1500;
+
+    @Key("title-fade-out")
+    @Comment("Время исчезновения титра в миллисекундах")
+    int titleFadeOut = 500;
+
+    public TitleDurations getTitleDurations() {
+        return new TitleDurations(titleFadeIn, titleStay, titleFadeOut);
+    }
+
+    public static class TitleDurations {
+        private final int fadeIn;
+        private final int stay;
+        private final int fadeOut;
+
+        public TitleDurations(int fadeIn, int stay, int fadeOut) {
+            this.fadeIn = fadeIn;
+            this.stay = stay;
+            this.fadeOut = fadeOut;
+        }
+
+        public int getFadeIn() { return fadeIn; }
+        public int getStay() { return stay; }
+        public int getFadeOut() { return fadeOut; }
+    }
 }

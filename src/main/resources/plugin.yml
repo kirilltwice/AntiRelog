@@ -15,5 +15,6 @@ softdepend:
   - WorldGuard
   - LibsDisguises
   - CMI
+  - TAB
 
 website: https://github.com/kirilltwice/AntiRelog

@@ -5,7 +5,7 @@ plugins {
 
 group = 'dev.twice'
 archivesBaseName = 'antirelog'
-version = '1.0.1'
+version = '1.0.2'
 description = 'AntiRelog'
 
 java {
@@ -16,7 +16,12 @@ java {
 
 compileJava {
     options.encoding = 'UTF-8'
-    options.compilerArgs += ['-Xlint:all', '-Xlint:-options', '-parameters']
+    options.compilerArgs += [
+            '-Xlint:all',
+            '-Xlint:-options',
+            '-Xlint:-processing',
+            '-parameters'
+    ]
 }
 
 repositories {
@@ -72,6 +77,8 @@ dependencies {
     compileOnly('com.github.Zrips:CMI-API:9.7.14.3') {
         exclude group: 'org.spigotmc', module: 'spigot-api'
     }
+    compileOnly 'com.github.NEZNAMY:TAB-API:5.2.4'
+
     implementation 'com.github.Leymooo:AnnotatedYAMLConfiguration:2cbe5f9fa3'
     implementation 'org.codemc.worldguardwrapper:worldguardwrapper:1.2.1-SNAPSHOT'
     implementation 'dev.rollczi:litecommands-bukkit:3.9.7'
@@ -99,6 +106,9 @@ shadowJar {
     exclude 'META-INF/LICENSE*'
     exclude 'META-INF/NOTICE*'
     exclude 'META-INF/maven/**'
+    exclude '**/*.java'
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 build {

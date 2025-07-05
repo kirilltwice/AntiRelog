@@ -4,7 +4,51 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="60dd051f-f80b-480d-8baa-f3f10c6db9d4" name="Changes" comment="" />
+    <list default="true" id="60dd051f-f80b-480d-8baa-f3f10c6db9d4" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/AntiRelogAPI.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/events/CombatStartEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/events/CombatTickEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/events/PlayerKickInCombatEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/events/PlayerLeaveInCombatEvent.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/ConfigLoader.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/core/PluginInitializer.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/HookManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/PluginHook.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/CMIHook.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/EssentialsHook.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/LibsDisguisesHook.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/TABHook.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/VanishHook.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/WorldGuardHook.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/ListenerManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/impl/CombatListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/impl/CooldownListener.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CombatManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/ScoreboardManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/ScoreboardProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/TABProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules/AntiRelog.main.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/AntiRelog.main.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/Main.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/command/AntiRelogCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/command/AntiRelogCommand.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/Messages.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/Messages.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/Settings.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/Settings.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/CooldownListener.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/EnderChestListener.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/EssentialsTeleportListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/EssentialsTeleportListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/PvPListener.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/WorldGuardListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/WorldGuardListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/BossbarManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/BossbarManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CooldownManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CooldownManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/PowerUpsManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/PowerUpsManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/PvPManager.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/ActionBar.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/CommandMapUtils.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/plugin.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/plugin.yml" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -27,37 +71,61 @@
       </state>
     </system>
   </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;kirilltwice&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/kirilltwice/AntiRelog.git&quot;,
+    &quot;accountId&quot;: &quot;0b2e4e28-b7df-4edd-8b01-0dae34d17586&quot;
+  }
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
   <component name="ProjectId" id="2z3fXTaNotWWSEPEeaT4YZ7EgTK" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Gradle.AntiRelog [shadowJar].executor": "Run",
-    "Gradle.C:/Users/kirilltwice/IdeaProjects/AntiRelog [wrapper].executor": "Run",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "master",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "project.structure.last.edited": "Project",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Gradle.AntiRelog [clean shadowJar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.AntiRelog [shadowJar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.C:/Users/kirilltwice/IdeaProjects/AntiRelog [wrapper].executor&quot;: &quot;Run&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager">
-    <configuration name="AntiRelog [shadowJar]" type="GradleRunConfiguration" factoryName="Gradle" nameIsGenerated="true">
+    <configuration name="AntiRelog [clean shadowJar]" type="GradleRunConfiguration" factoryName="Gradle" nameIsGenerated="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -68,6 +136,7 @@
         </option>
         <option name="taskNames">
           <list>
+            <option value="clean" />
             <option value="shadowJar" />
           </list>
         </option>
@@ -99,6 +168,8 @@
       <workItem from="1750964781903" duration="18000" />
       <workItem from="1750964940733" duration="219000" />
       <workItem from="1750965184833" duration="450000" />
+      <workItem from="1751660805554" duration="4960000" />
+      <workItem from="1751695151179" duration="3352000" />
     </task>
     <servers />
   </component>
