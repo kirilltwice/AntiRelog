@@ -97,7 +97,7 @@ public class CombatListener implements Listener {
         if (!(event.getPotion().getShooter() instanceof Player shooter)) return;
 
         boolean hasHarmfulEffect = event.getPotion().getEffects().stream()
-                .anyMatch(effect -> effect.getType().getEffectCategory() == PotionEffectType.Category.HARMFUL);
+                .anyMatch(effect -> effect.getType() == PotionEffectType.HARM);
 
         if (hasHarmfulEffect) {
             event.getAffectedEntities().stream()

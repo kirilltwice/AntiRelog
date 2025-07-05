@@ -1,11 +1,11 @@
 name: AntiRelog
 main: dev.twice.antirelog.Main
 
-authors: [ Twice, Leymooo ]
+authors: [ Twice, Leymooo, alexec0de ]
 prefix: AntiRelog
 
 version: ${version}
-api-version: 1.21
+api-version: 1.16
 
 softdepend:
   - Essentials

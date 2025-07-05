@@ -5,48 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="60dd051f-f80b-480d-8baa-f3f10c6db9d4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/AntiRelogAPI.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/events/CombatStartEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/events/CombatTickEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/events/PlayerKickInCombatEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/events/PlayerLeaveInCombatEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/ConfigLoader.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/core/PluginInitializer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/HookManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/PluginHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/CMIHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/EssentialsHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/LibsDisguisesHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/TABHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/VanishHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/WorldGuardHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/ListenerManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/impl/CombatListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/impl/CooldownListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CombatManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/ScoreboardManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/ScoreboardProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/TABProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/AntiRelog.main.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/AntiRelog.main.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/command/AntiRelogCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/command/AntiRelogCommand.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/Messages.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/Messages.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/Settings.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/Settings.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/CooldownListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/EnderChestListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/EssentialsTeleportListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/EssentialsTeleportListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/PvPListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/WorldGuardListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/WorldGuardListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/BossbarManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/BossbarManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CooldownManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CooldownManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/PowerUpsManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/PowerUpsManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/PvPManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/ActionBar.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/CommandMapUtils.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/impl/CombatListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/impl/CombatListener.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CombatManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CombatManager.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/plugin.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/plugin.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -62,9 +24,28 @@
   <component name="ExternalProjectsManager">
     <system id="GRADLE">
       <state>
+        <task path="$PROJECT_DIR$">
+          <activation />
+        </task>
         <projects_view>
           <tree_state>
-            <expand />
+            <expand>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="AntiRelog" type="f1a62948:ProjectNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="AntiRelog" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="AntiRelog" type="f1a62948:ProjectNode" />
+                <item name="Tasks" type="e4a08cd1:TasksNode" />
+                <item name="build" type="c8890929:TasksNode$1" />
+              </path>
+            </expand>
             <select />
           </tree_state>
         </projects_view>
@@ -75,10 +56,16 @@
     <option name="RECENT_TEMPLATES">
       <list>
         <option value="Class" />
+        <option value="Record" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
@@ -93,6 +80,9 @@
     &quot;accountId&quot;: &quot;0b2e4e28-b7df-4edd-8b01-0dae34d17586&quot;
   }
 }</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="ProjectErrors" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 3
 }</component>
@@ -104,27 +94,57 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;Gradle.AntiRelog [clean shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.AntiRelog [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.C:/Users/kirilltwice/IdeaProjects/AntiRelog [wrapper].executor&quot;: &quot;Run&quot;,
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Project&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Gradle.AntiRelog [build].executor": "Run",
+    "Gradle.AntiRelog [clean shadowJar].executor": "Run",
+    "Gradle.AntiRelog [shadowJar].executor": "Run",
+    "Gradle.Build AntiRelog.executor": "Run",
+    "Gradle.C:/Users/kirilltwice/IdeaProjects/AntiRelog [wrapper].executor": "Run",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "1.16.5",
+    "kotlin-language-version-configured": "true",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
-  <component name="RunManager">
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CreateClassDialog.RecentsKey">
+      <recent name="dev.twice.antirelog.managers" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Gradle.AntiRelog [build]">
+    <configuration name="AntiRelog [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="build" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
     <configuration name="AntiRelog [clean shadowJar]" type="GradleRunConfiguration" factoryName="Gradle" nameIsGenerated="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -148,15 +168,13 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Gradle.AntiRelog [build]" />
+      </list>
+    </recent_temporary>
   </component>
-  <component name="SharedIndexes">
-    <attachedChunks>
-      <set>
-        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.23774.435" />
-        <option value="bundled-js-predefined-d6986cc7102b-f27c65a3e318-JavaScript-IU-251.23774.435" />
-      </set>
-    </attachedChunks>
-  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
       <changelist id="60dd051f-f80b-480d-8baa-f3f10c6db9d4" name="Changes" comment="" />
@@ -170,6 +188,10 @@
       <workItem from="1750965184833" duration="450000" />
       <workItem from="1751660805554" duration="4960000" />
       <workItem from="1751695151179" duration="3352000" />
+      <workItem from="1751699848842" duration="362000" />
+      <workItem from="1751700217370" duration="188000" />
+      <workItem from="1751700691153" duration="11000" />
+      <workItem from="1751700747009" duration="591000" />
     </task>
     <servers />
   </component>
