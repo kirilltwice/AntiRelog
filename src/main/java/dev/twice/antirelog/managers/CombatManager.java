@@ -1,9 +1,7 @@
 package dev.twice.antirelog.managers;
 
 import dev.twice.antirelog.Main;
-import dev.twice.antirelog.api.events.CombatEndEvent;
-import dev.twice.antirelog.api.events.CombatStartEvent;
-import dev.twice.antirelog.api.events.CombatTickEvent;
+import dev.twice.antirelog.api.events.*;
 import dev.twice.antirelog.config.Settings;
 import dev.twice.antirelog.scoreboard.ScoreboardManager;
 import dev.twice.antirelog.util.Utils;
@@ -350,7 +348,7 @@ public class CombatManager {
                 Component.empty() : Utils.colorize(subtitleTextKey);
 
         var durations = settings.getMessages().getTitleDurations();
-        Title.Times times = Title.Times.times(
+        Title.Times times = Title.Times.of(
                 Duration.ofMillis(durations.getFadeIn()),
                 Duration.ofMillis(durations.getStay()),
                 Duration.ofMillis(durations.getFadeOut())
