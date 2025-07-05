@@ -21,7 +21,7 @@ public class Utils {
         }
 
         message = translateHexCodes(message);
-        return message;
+        return message.replace('&', '§');
     }
 
     public Component colorize(String message) {
@@ -53,6 +53,7 @@ public class Utils {
         }
 
         message = message.replaceAll("&[0-9a-fk-or]", "");
+        message = message.replaceAll("§[0-9a-fk-or]", "");
         message = message.replaceAll("&#[0-9A-Fa-f]{6}", "");
         message = message.replaceAll("<#[0-9A-Fa-f]{6}>", "");
 
@@ -65,11 +66,7 @@ public class Utils {
         }
 
         Component component = colorize(message);
-        return LegacyComponentSerializer.builder()
-                .character('&')
-                .extractUrls()
-                .build()
-                .serialize(component.asComponent());
+        return LegacyComponentSerializer.legacySection().serialize(component);
     }
 
     public boolean hasColors(String message) {
@@ -77,7 +74,7 @@ public class Utils {
             return false;
         }
 
-        return message.contains("&");
+        return message.contains("&") || message.contains("§");
     }
 
     public String formatTimeUnit(String base, String singular, String few, String many, int number) {

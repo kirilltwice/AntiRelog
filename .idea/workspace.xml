@@ -9,7 +9,7 @@
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/impl/CombatListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/impl/CombatListener.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CombatManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CombatManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/plugin.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/plugin.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/resources/plugin.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/plugin.yml" after
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,6 +67,7 @@
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -192,10 +193,26 @@
       <workItem from="1751700217370" duration="188000" />
       <workItem from="1751700691153" duration="11000" />
       <workItem from="1751700747009" duration="591000" />
+
+     
+
     </task>
+    <task id="LOCAL-00001" summary="Added API. Added scoreboard support via tab-api for scoreboard configuration and for where I took it as a basis, thanks to: GreatCombat is the best alternative for 1.16 by the way. I divided Main into classes so that it would not be so big that I did not like it. Removed PvPManager, EnderChestListener, CommandMapUtils, ActionBar, the plugin did not lose functionality, they still work. You can figure out the API below. Added the ability to change the colors of the boss bar, as well as the type">
+      <option name="closed" value="true" />
+      <created>1751698773763</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1751698773763</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Added API. Added scoreboard support via tab-api for scoreboard configuration and for where I took it as a basis, thanks to: GreatCombat is the best alternative for 1.16 by the way. I divided Main into classes so that it would not be so big that I did not like it. Removed PvPManager, EnderChestListener, CommandMapUtils, ActionBar, the plugin did not lose functionality, they still work. You can figure out the API below. Added the ability to change the colors of the boss bar, as well as the type" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added API. Added scoreboard support via tab-api for scoreboard configuration and for where I took it as a basis, thanks to: GreatCombat is the best alternative for 1.16 by the way. I divided Main into classes so that it would not be so big that I did not like it. Removed PvPManager, EnderChestListener, CommandMapUtils, ActionBar, the plugin did not lose functionality, they still work. You can figure out the API below. Added the ability to change the colors of the boss bar, as well as the type" />
   </component>
 </project>
