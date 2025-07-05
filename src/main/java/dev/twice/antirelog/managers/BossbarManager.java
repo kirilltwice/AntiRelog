@@ -3,6 +3,8 @@ package dev.twice.antirelog.managers;
 import dev.twice.antirelog.config.Settings;
 import dev.twice.antirelog.util.Utils;
 import lombok.RequiredArgsConstructor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
@@ -19,6 +21,9 @@ public final class BossbarManager {
     private final Map<Player, BossBar> activePlayerBars = new WeakHashMap<>();
     private final Settings settings;
 
+    private static final LegacyComponentSerializer LEGACY_SERIALIZER =
+            LegacyComponentSerializer.legacySection();
+
     public void createBossBars() {
         clearBossbars();
         if (!settings.getBossbar().isEnabled() || settings.getCombatTime() <= 0) return;
@@ -28,16 +33,16 @@ public final class BossbarManager {
 
         BarColor color = parseColor(settings.getBossbar().getColor());
         BarStyle style = parseStyle(settings.getBossbar().getStyle());
-        double progressIncrement = 1.0 / settings.getCombatTime();
 
         for (int timeRemaining = 1; timeRemaining <= settings.getCombatTime(); timeRemaining++) {
-            double currentProgress = (double) timeRemaining * progressIncrement;
+            double currentProgress = (double) timeRemaining / (double) settings.getCombatTime();
 
             String processedTitle = Utils.replaceTime(titleTemplate, timeRemaining);
-            String coloredTitle = Utils.color(processedTitle);
+            Component coloredComponent = Utils.colorize(processedTitle);
+            String legacyTitle = LEGACY_SERIALIZER.serialize(coloredComponent);
 
-            BossBar bossBar = Bukkit.createBossBar(coloredTitle, color, style);
-            bossBar.setProgress(Math.clamp(currentProgress, 0.0, 1.0));
+            BossBar bossBar = Bukkit.createBossBar(legacyTitle, color, style);
+            bossBar.setProgress(Math.max(0.0, Math.min(1.0, currentProgress)));
             bossBars.put(timeRemaining, bossBar);
         }
     }
@@ -50,17 +55,38 @@ public final class BossbarManager {
 
         if (timeRemaining <= 0) return;
 
-        BossBar newBar = bossBars.get(timeRemaining);
-        if (newBar != null) {
+        BossBar bossBar = bossBars.get(timeRemaining);
+        if (bossBar == null) {
             String titleTemplate = settings.getBossbar().getTitle();
             if (titleTemplate != null && !titleTemplate.isEmpty()) {
                 String processedTitle = Utils.replaceTime(titleTemplate, timeRemaining);
-                String coloredTitle = Utils.color(processedTitle);
-                newBar.setTitle(coloredTitle);
-            }
+                Component coloredComponent = Utils.colorize(processedTitle);
+                String legacyTitle = LEGACY_SERIALIZER.serialize(coloredComponent);
 
-            newBar.addPlayer(player);
-            activePlayerBars.put(player, newBar);
+                BarColor color = parseColor(settings.getBossbar().getColor());
+                BarStyle style = parseStyle(settings.getBossbar().getStyle());
+                double currentProgress = (double) timeRemaining / (double) settings.getCombatTime();
+
+                bossBar = Bukkit.createBossBar(legacyTitle, color, style);
+                bossBar.setProgress(Math.max(0.0, Math.min(1.0, currentProgress)));
+                bossBars.put(timeRemaining, bossBar);
+            }
+        } else {
+            String titleTemplate = settings.getBossbar().getTitle();
+            if (titleTemplate != null && !titleTemplate.isEmpty()) {
+                String processedTitle = Utils.replaceTime(titleTemplate, timeRemaining);
+                Component coloredComponent = Utils.colorize(processedTitle);
+                String legacyTitle = LEGACY_SERIALIZER.serialize(coloredComponent);
+                bossBar.setTitle(legacyTitle);
+
+                double currentProgress = (double) timeRemaining / (double) settings.getCombatTime();
+                bossBar.setProgress(Math.max(0.0, Math.min(1.0, currentProgress)));
+            }
+        }
+
+        if (bossBar != null) {
+            bossBar.addPlayer(player);
+            activePlayerBars.put(player, bossBar);
         }
     }
 
@@ -80,16 +106,18 @@ public final class BossbarManager {
     }
 
     private BarColor parseColor(String colorName) {
+        if (colorName == null) return BarColor.RED;
         try {
-            return BarColor.valueOf(colorName.toUpperCase());
+            return BarColor.valueOf(colorName.toUpperCase().trim());
         } catch (IllegalArgumentException e) {
             return BarColor.RED;
         }
     }
 
     private BarStyle parseStyle(String styleName) {
+        if (styleName == null) return BarStyle.SOLID;
         try {
-            return BarStyle.valueOf(styleName.toUpperCase());
+            return BarStyle.valueOf(styleName.toUpperCase().trim());
         } catch (IllegalArgumentException e) {
             return BarStyle.SOLID;
         }

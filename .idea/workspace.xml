@@ -4,50 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="60dd051f-f80b-480d-8baa-f3f10c6db9d4" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/AntiRelogAPI.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/events/CombatStartEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/events/CombatTickEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/events/PlayerKickInCombatEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/api/events/PlayerLeaveInCombatEvent.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/ConfigLoader.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/core/PluginInitializer.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/HookManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/PluginHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/CMIHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/EssentialsHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/LibsDisguisesHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/TABHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/VanishHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/hooks/impl/WorldGuardHook.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/ListenerManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/impl/CombatListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/impl/CooldownListener.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CombatManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/ScoreboardManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/ScoreboardProvider.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/TABProvider.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules/AntiRelog.main.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules/AntiRelog.main.iml" afterDir="false" />
+    <list default="true" id="60dd051f-f80b-480d-8baa-f3f10c6db9d4" name="Changes" comment="Added API. Added scoreboard support via tab-api for scoreboard configuration and for where I took it as a basis, thanks to: GreatCombat is the best alternative for 1.16 by the way. I divided Main into classes so that it would not be so big that I did not like it. Removed PvPManager, EnderChestListener, CommandMapUtils, ActionBar, the plugin did not lose functionality, they still work. You can figure out the API below. Added the ability to change the colors of the boss bar, as well as the type">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/command/AntiRelogCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/command/AntiRelogCommand.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/Messages.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/Messages.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/Settings.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/config/Settings.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/CooldownListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/EnderChestListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/EssentialsTeleportListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/EssentialsTeleportListener.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/PvPListener.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/WorldGuardListener.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/listeners/WorldGuardListener.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/BossbarManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/BossbarManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CooldownManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CooldownManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/PowerUpsManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/PowerUpsManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/PvPManager.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/ActionBar.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/CommandMapUtils.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/Utils.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/resources/plugin.yml" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/plugin.yml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,7 +39,9 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="PUSH_AUTO_UPDATE" value="true" />
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="UPDATE_TYPE" value="REBASE" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -169,11 +131,24 @@
       <workItem from="1750964940733" duration="219000" />
       <workItem from="1750965184833" duration="450000" />
       <workItem from="1751660805554" duration="4960000" />
-      <workItem from="1751695151179" duration="3352000" />
+      <workItem from="1751695151179" duration="5023000" />
     </task>
+    <task id="LOCAL-00001" summary="Added API. Added scoreboard support via tab-api for scoreboard configuration and for where I took it as a basis, thanks to: GreatCombat is the best alternative for 1.16 by the way. I divided Main into classes so that it would not be so big that I did not like it. Removed PvPManager, EnderChestListener, CommandMapUtils, ActionBar, the plugin did not lose functionality, they still work. You can figure out the API below. Added the ability to change the colors of the boss bar, as well as the type">
+      <option name="closed" value="true" />
+      <created>1751698773763</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1751698773763</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Added API. Added scoreboard support via tab-api for scoreboard configuration and for where I took it as a basis, thanks to: GreatCombat is the best alternative for 1.16 by the way. I divided Main into classes so that it would not be so big that I did not like it. Removed PvPManager, EnderChestListener, CommandMapUtils, ActionBar, the plugin did not lose functionality, they still work. You can figure out the API below. Added the ability to change the colors of the boss bar, as well as the type" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added API. Added scoreboard support via tab-api for scoreboard configuration and for where I took it as a basis, thanks to: GreatCombat is the best alternative for 1.16 by the way. I divided Main into classes so that it would not be so big that I did not like it. Removed PvPManager, EnderChestListener, CommandMapUtils, ActionBar, the plugin did not lose functionality, they still work. You can figure out the API below. Added the ability to change the colors of the boss bar, as well as the type" />
   </component>
 </project>
