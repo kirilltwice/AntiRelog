@@ -1,12 +1,15 @@
 package dev.twice.antirelog.scoreboard;
 
 import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.scoreboard.Scoreboard;
 import me.neznamy.tab.api.scoreboard.ScoreboardManager;
 import org.bukkit.entity.Player;
 import java.util.List;
 
 public class TABProvider implements ScoreboardProvider {
+
+    private static final String SCOREBOARD_NAME = "antirelog";
 
     private boolean isTabAvailable() {
         try {
@@ -23,15 +26,21 @@ public class TABProvider implements ScoreboardProvider {
             return;
         }
 
-        TabAPI tabAPI = TabAPI.getInstance();
-        ScoreboardManager scoreboardManager = tabAPI.getScoreboardManager();
+        try {
+            TabAPI tabAPI = TabAPI.getInstance();
+            ScoreboardManager scoreboardManager = tabAPI.getScoreboardManager();
+            TabPlayer tabPlayer = tabAPI.getPlayer(player.getUniqueId());
 
-        if (scoreboardManager == null) {
-            return;
+            if (scoreboardManager == null || tabPlayer == null) {
+                return;
+            }
+
+            Scoreboard scoreboard = scoreboardManager.createScoreboard(SCOREBOARD_NAME, title, lines);
+            scoreboardManager.showScoreboard(tabPlayer, scoreboard);
+
+        } catch (Exception e) {
+            System.out.println("[AntiRelog] Ошибка установки скорборда: " + e.getMessage());
         }
-
-        Scoreboard sb = scoreboardManager.createScoreboard("antirelog", title, lines);
-        scoreboardManager.showScoreboard(tabAPI.getPlayer(player.getUniqueId()), sb);
     }
 
     @Override
@@ -40,13 +49,19 @@ public class TABProvider implements ScoreboardProvider {
             return;
         }
 
-        TabAPI tabAPI = TabAPI.getInstance();
-        ScoreboardManager scoreboardManager = tabAPI.getScoreboardManager();
+        try {
+            TabAPI tabAPI = TabAPI.getInstance();
+            ScoreboardManager scoreboardManager = tabAPI.getScoreboardManager();
+            TabPlayer tabPlayer = tabAPI.getPlayer(player.getUniqueId());
 
-        if (scoreboardManager == null) {
-            return;
+            if (scoreboardManager == null || tabPlayer == null) {
+                return;
+            }
+
+            scoreboardManager.resetScoreboard(tabPlayer);
+
+        } catch (Exception e) {
+            System.out.println("[AntiRelog] Ошибка сброса скорборда: " + e.getMessage());
         }
-
-        scoreboardManager.resetScoreboard(tabAPI.getPlayer(player.getUniqueId()));
     }
 }

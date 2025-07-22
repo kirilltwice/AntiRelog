@@ -10,15 +10,17 @@ import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.Map;
-import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RequiredArgsConstructor
-public final class BossbarManager {
+public final class BossbarManager implements Listener {
     private final Map<Integer, BossBar> bossBars = new ConcurrentHashMap<>();
-    private final Map<Player, BossBar> activePlayerBars = new WeakHashMap<>();
+    private final Map<Player, BossBar> activePlayerBars = new ConcurrentHashMap<>();
     private final Settings settings;
 
     private static final LegacyComponentSerializer LEGACY_SERIALIZER =
@@ -103,6 +105,11 @@ public final class BossbarManager {
         activePlayerBars.clear();
         bossBars.values().forEach(BossBar::removeAll);
         bossBars.clear();
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        clearBossbar(event.getPlayer());
     }
 
     private BarColor parseColor(String colorName) {

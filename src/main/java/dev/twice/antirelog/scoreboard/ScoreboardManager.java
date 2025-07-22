@@ -26,14 +26,12 @@ public class ScoreboardManager {
                         Class.forName("me.neznamy.tab.api.TabAPI");
                         yield new TABProvider();
                     } catch (ClassNotFoundException | NoClassDefFoundError e) {
-                        System.out.println("[AntiRelog] TAB плагин не найден, скорборды отключены");
                         yield null;
                     }
                 }
                 default -> null;
             };
         } catch (Exception e) {
-            System.out.println("[AntiRelog] Ошибка при инициализации провайдера скорборда: " + e.getMessage());
             provider = null;
         }
     }
@@ -48,7 +46,7 @@ public class ScoreboardManager {
         }
 
         String title = Utils.color(config.getTitle());
-        List<String> lines = getLines(player, time, opponents);
+        List<String> lines = getLines(time, opponents);
         provider.setScoreboard(player, title, lines);
     }
 
@@ -56,11 +54,10 @@ public class ScoreboardManager {
         if (provider == null) {
             return;
         }
-
         provider.resetScoreboard(player);
     }
 
-    private List<String> getLines(Player player, String time, Set<Player> opponents) {
+    private List<String> getLines(String time, Set<Player> opponents) {
         List<String> result = new ArrayList<>();
 
         if (config == null || config.getLines() == null) {
@@ -69,7 +66,15 @@ public class ScoreboardManager {
 
         for (String line : config.getLines()) {
             if (line.contains("{opponents}")) {
-                result.addAll(getOpponents(opponents));
+                List<String> opponentLines = getOpponents(opponents);
+                if (opponentLines.isEmpty()) {
+                    String emptyMessage = config.getEmpty();
+                    if (emptyMessage != null && !emptyMessage.trim().isEmpty()) {
+                        result.add(Utils.color(emptyMessage));
+                    }
+                } else {
+                    result.addAll(opponentLines);
+                }
             } else {
                 String processedLine = line.replace("{time}", time);
                 result.add(Utils.color(processedLine));
@@ -86,21 +91,18 @@ public class ScoreboardManager {
             return result;
         }
 
-        if (opponents == null || opponents.isEmpty()) {
-            String emptyMessage = config.getEmpty();
-            if (emptyMessage != null) {
-                result.add(Utils.color(emptyMessage));
-            }
-        } else {
+        if (opponents != null && !opponents.isEmpty()) {
             String opponentTemplate = config.getOpponent();
             if (opponentTemplate != null) {
-                opponents.forEach(opponent -> {
-                    String opponentLine = opponentTemplate
-                            .replace("{player}", opponent.getName())
-                            .replace("{health}", String.format("%.1f", opponent.getHealth()))
-                            .replace("{ping}", String.valueOf(opponent.getPing()));
-                    result.add(Utils.color(opponentLine));
-                });
+                for (Player opponent : opponents) {
+                    if (opponent != null && opponent.isOnline()) {
+                        String opponentLine = opponentTemplate
+                                .replace("{player}", opponent.getName())
+                                .replace("{health}", String.format("%.1f", opponent.getHealth()))
+                                .replace("{ping}", String.valueOf(opponent.getPing()));
+                        result.add(Utils.color(opponentLine));
+                    }
+                }
             }
         }
 

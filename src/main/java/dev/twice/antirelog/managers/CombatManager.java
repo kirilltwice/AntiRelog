@@ -51,6 +51,8 @@ public class CombatManager {
         cacheDisabledWorldsAndRegions();
         startCombatTimer();
         bossbarManager.createBossBars();
+
+        plugin.getServer().getPluginManager().registerEvents(bossbarManager, plugin);
     }
 
     public void shutdown() {
@@ -416,7 +418,7 @@ public class CombatManager {
             return false;
         }
     }
-    
+
     public boolean isDisableCommandsInPvp() {
         return settings.isDisableCommandsInCombat();
     }

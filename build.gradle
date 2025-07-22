@@ -77,7 +77,7 @@ dependencies {
     compileOnly('com.github.Zrips:CMI-API:9.7.14.3') {
         exclude group: 'org.spigotmc', module: 'spigot-api'
     }
-    compileOnly 'com.github.NEZNAMY:TAB-API:5.2.4'
+    compileOnly 'com.github.NEZNAMY:TAB-API:5.2.5'
 
     implementation 'com.github.Leymooo:AnnotatedYAMLConfiguration:2cbe5f9fa3'
     implementation 'org.codemc.worldguardwrapper:worldguardwrapper:1.2.1-SNAPSHOT'

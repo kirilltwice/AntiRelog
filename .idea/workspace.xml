@@ -6,8 +6,12 @@
   <component name="ChangeListManager">
     <list default="true" id="60dd051f-f80b-480d-8baa-f3f10c6db9d4" name="Changes" comment="Added API. Added scoreboard support via tab-api for scoreboard configuration and for where I took it as a basis, thanks to: GreatCombat is the best alternative for 1.16 by the way. I divided Main into classes so that it would not be so big that I did not like it. Removed PvPManager, EnderChestListener, CommandMapUtils, ActionBar, the plugin did not lose functionality, they still work. You can figure out the API below. Added the ability to change the colors of the boss bar, as well as the type">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/command/AntiRelogCommand.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/command/AntiRelogCommand.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/BossbarManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/BossbarManager.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/Utils.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/util/Utils.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CombatManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/managers/CombatManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/ScoreboardManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/ScoreboardManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/TABProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dev/twice/antirelog/scoreboard/TABProvider.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -132,6 +136,18 @@
       <workItem from="1750965184833" duration="450000" />
       <workItem from="1751660805554" duration="4960000" />
       <workItem from="1751695151179" duration="5023000" />
+      <workItem from="1751701956394" duration="59000" />
+      <workItem from="1751702018031" duration="1382000" />
+      <workItem from="1751745363639" duration="1787000" />
+      <workItem from="1751791828853" duration="1189000" />
+      <workItem from="1751808065099" duration="1000" />
+      <workItem from="1751808180249" duration="603000" />
+      <workItem from="1751822870948" duration="5000" />
+      <workItem from="1751827291759" duration="1783000" />
+      <workItem from="1752007427713" duration="489000" />
+      <workItem from="1752252782906" duration="7000" />
+      <workItem from="1752609141245" duration="8000" />
+      <workItem from="1753194045936" duration="1893000" />
     </task>
     <task id="LOCAL-00001" summary="Added API. Added scoreboard support via tab-api for scoreboard configuration and for where I took it as a basis, thanks to: GreatCombat is the best alternative for 1.16 by the way. I divided Main into classes so that it would not be so big that I did not like it. Removed PvPManager, EnderChestListener, CommandMapUtils, ActionBar, the plugin did not lose functionality, they still work. You can figure out the API below. Added the ability to change the colors of the boss bar, as well as the type">
       <option name="closed" value="true" />
