@@ -32,7 +32,7 @@ public class AntiRelogCommand {
     @Permission("antirelog.admin")
     public void reload(@Context CommandSender sender) {
         plugin.reload();
-        sender.sendMessage("§aКонфиг успешно перезагружен!");
+        sender.sendMessage("§7Конфиг успешно перезагружен!");
     }
 
     @Execute(name = "start")
@@ -43,7 +43,7 @@ public class AntiRelogCommand {
             combatManager.forceStartCombat(player);
             count++;
         }
-        sender.sendMessage("§a" + count + " игроков принудительно вошли в боевой режим!");
+        sender.sendMessage("§f" + count + " игроков принудительно вошли в боевой режим!");
     }
 
     @Execute(name = "start")
@@ -61,15 +61,15 @@ public class AntiRelogCommand {
         }
 
         combatManager.forceStartCombat(target);
-        sender.sendMessage("§aИгрок " + target.getName() + " принудительно вошел в боевой режим!");
-        target.sendMessage("§aВы принудительно вошли в боевой режим!");
+        sender.sendMessage("§7Игрок " + target.getName() + " принудительно вошел в боевой режим!");
+        target.sendMessage("§7Вы принудительно вошли в боевой режим!");
     }
 
     @Execute(name = "start")
     @Permission("antirelog.admin")
     public void startSelf(@Context Player player) {
         combatManager.forceStartCombat(player);
-        player.sendMessage("§aВы принудительно вошли в боевой режим!");
+        player.sendMessage("§7Вы принудительно вошли в боевой режим!");
     }
 
     @Execute(name = "stop")
@@ -82,7 +82,7 @@ public class AntiRelogCommand {
                 count++;
             }
         }
-        sender.sendMessage("§a" + count + " игроков вышли из боевого режима!");
+        sender.sendMessage("§7" + count + " игроков вышли из боевого режима!");
     }
 
     @Execute(name = "stop")
@@ -100,14 +100,14 @@ public class AntiRelogCommand {
         }
 
         combatManager.stopCombat(target);
-        sender.sendMessage("§aИгрок " + target.getName() + " вышел из боевого режима!");
-        target.sendMessage("§aВы вышли из боевого режима!");
+        sender.sendMessage("§7Игрок " + target.getName() + " вышел из боевого режима!");
+        target.sendMessage("§7Вы вышли из боевого режима!");
     }
 
     @Execute(name = "stop")
     @Permission("antirelog.admin")
     public void stopSelf(@Context Player player) {
         combatManager.stopCombat(player);
-        player.sendMessage("§aВы вышли из боевого режима!");
+        player.sendMessage("§7Вы вышли из боевого режима!");
     }
 }
