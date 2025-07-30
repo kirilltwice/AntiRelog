@@ -86,15 +86,15 @@ public final class Messages implements ConfigurationSection {
     String combatStartedWithPowerups = "&c&lВы начали combat с включенным GM/FLY/и тд и за это получили негативный эффект";
 
     @Key("title-fade-in")
-    @Comment("Время появления титра в миллисекундах")
+    @Comment("Время появления тайтла в миллисекундах")
     int titleFadeIn = 500;
 
     @Key("title-stay")
-    @Comment("Время показа титра в миллисекундах")
+    @Comment("Время показа тайтла в миллисекундах")
     int titleStay = 1500;
 
     @Key("title-fade-out")
-    @Comment("Время исчезновения титра в миллисекундах")
+    @Comment("Время исчезновения тайтла в миллисекундах")
     int titleFadeOut = 500;
 
     public TitleDurations getTitleDurations() {
