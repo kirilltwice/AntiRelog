@@ -1,4 +1,4 @@
-# 🛡️ AntiRelog++
+# 🛡️ AntiRelog
 
 <div align="center">
 
