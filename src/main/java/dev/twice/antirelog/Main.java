@@ -42,7 +42,6 @@ public class Main extends JavaPlugin {
     private PvPManager pvpManager;
     @Getter
     private CooldownManager cooldownManager;
-    private CooldownListener cooldownListener;
     @Getter
     private boolean worldguardEnabled;
     private LiteCommands<CommandSender> liteCommands;
@@ -56,9 +55,9 @@ public class Main extends JavaPlugin {
 
         detectPlugins();
 
-        this.cooldownListener = new CooldownListener(this, cooldownManager, pvpManager, pluginSettings);
-        this.cooldownListener.initializeListeners();
-        getServer().getPluginManager().registerEvents(this.cooldownListener, this);
+        CooldownListener cooldownListener = new CooldownListener(this, cooldownManager, pvpManager, pluginSettings);
+        cooldownListener.initializeListeners();
+        getServer().getPluginManager().registerEvents(cooldownListener, this);
 
         getServer().getPluginManager().registerEvents(new PvPListener(this, pvpManager, pluginSettings), this);
 

@@ -186,7 +186,7 @@ public class PvPListener implements Listener {
     public void onPlayerKick(PlayerKickEvent event) {
         Player player = event.getPlayer();
         if (this.pvpManager.isInSilentPvP(player) || this.pvpManager.isInPvP(player)) {
-            this.pvpManager.stopPvPSilent(player);
+            this.pvpManager.stopPvpSilently(player);
             if (this.shouldKillOnKick(event)) {
                 this.handleKickedInPvp(player);
             }
@@ -205,7 +205,7 @@ public class PvPListener implements Listener {
         if (this.pvpManager.isInPvP(player)) {
             this.handlePlayerLeave(player);
         } else if (this.pvpManager.isInSilentPvP(player)) {
-            this.pvpManager.stopPvPSilent(player);
+            this.pvpManager.stopPvpSilently(player);
         }
     }
 
@@ -218,7 +218,7 @@ public class PvPListener implements Listener {
         }
 
         if (this.pvpManager.isInSilentPvP(player) || this.pvpManager.isInPvP(player)) {
-            this.pvpManager.stopPvPSilent(player);
+            this.pvpManager.stopPvpSilently(player);
         }
     }
 
@@ -248,7 +248,7 @@ public class PvPListener implements Listener {
         event.setCancelled(true);
         String messageText = this.messages.getItemDisabledInPvp();
         if (messageText != null && !messageText.isEmpty()) {
-            Component message = LegacyComponentSerializer.legacySection().deserialize(Utils.color(messageText));
+            Component message = LegacyComponentSerializer.legacySection().deserialize(Utils.translateColors(messageText));
             player.sendMessage(message);
         }
     }
@@ -265,7 +265,7 @@ public class PvPListener implements Listener {
     private void sendCommandDisabledMessage(Player player) {
         String messageText = this.messages.getCommandsDisabled();
         if (messageText != null && !messageText.isEmpty()) {
-            String formattedMessage = Utils.color(Utils.replaceTime(messageText, this.pvpManager.getTimeRemainingInPvP(player)));
+            String formattedMessage = Utils.translateColors(Utils.replaceTimePlaceholders(messageText, this.pvpManager.getTimeRemainingInPvP(player)));
             Component component = LegacyComponentSerializer.legacySection().deserialize(formattedMessage);
             player.sendMessage(component);
         }
@@ -300,7 +300,7 @@ public class PvPListener implements Listener {
     }
 
     private void handlePlayerLeave(Player player) {
-        this.pvpManager.stopPvPSilent(player);
+        this.pvpManager.stopPvpSilently(player);
         if (this.settings.isKillOnLeave()) {
             player.setHealth(0.0D);
             this.sendPlayerLeftMessage(player, this.messages.getPvpLeaved());
@@ -313,7 +313,7 @@ public class PvPListener implements Listener {
             return;
         }
         String rawMessage = messageKey.replace("%player%", leaver.getName());
-        Component messageComponent = LegacyComponentSerializer.legacySection().deserialize(Utils.color(rawMessage));
+        Component messageComponent = LegacyComponentSerializer.legacySection().deserialize(Utils.translateColors(rawMessage));
         for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
             onlinePlayer.sendMessage(messageComponent);
         }

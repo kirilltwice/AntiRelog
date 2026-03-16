@@ -129,13 +129,13 @@ public class CooldownListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPvpStart(PvpStartedEvent event) {
-        cooldownManager.enteredToPvp(event.getDefender());
-        cooldownManager.enteredToPvp(event.getAttacker());
+        cooldownManager.onPvpEnter(event.getDefender());
+        cooldownManager.onPvpEnter(event.getAttacker());
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPvpStop(PvpStoppedEvent event) {
-        cooldownManager.removedFromPvp(event.getPlayer());
+        cooldownManager.onPvpExit(event.getPlayer());
     }
 
     private void handleGenericCooldownAction(Cancellable event, Player player, CooldownType type, int cooldownTimeSeconds) {
@@ -182,7 +182,7 @@ public class CooldownListener implements Listener {
                 : settings.getMessages().getItemDisabledInPvp();
 
         if (messageKey != null && !messageKey.isEmpty() && player.isOnline()) {
-            Component message = LegacyComponentSerializer.legacySection().deserialize(Utils.color(messageKey));
+            Component message = LegacyComponentSerializer.legacySection().deserialize(Utils.translateColors(messageKey));
             player.sendMessage(message);
         }
     }
@@ -210,7 +210,7 @@ public class CooldownListener implements Listener {
         if (messageTemplate != null && !messageTemplate.isEmpty() && player.isOnline()) {
             double remainingSecondsDecimal = Math.max(0.0, Math.round(remainingMillis / 100.0)) / 10.0;
             String formattedMessage = messageTemplate.replace("%time%", String.valueOf(remainingSecondsDecimal));
-            formattedMessage = Utils.color(Utils.replaceTime(formattedMessage, remainingSeconds));
+            formattedMessage = Utils.translateColors(Utils.replaceTimePlaceholders(formattedMessage, remainingSeconds));
             Component message = LegacyComponentSerializer.legacySection().deserialize(formattedMessage);
             player.sendMessage(message);
         }

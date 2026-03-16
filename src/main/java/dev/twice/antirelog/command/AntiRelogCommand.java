@@ -26,19 +26,19 @@ public class AntiRelogCommand {
 
     @Execute
     void sendHelp(@Context CommandSender sender) {
-        sender.sendMessage(Utils.color("&6=== AntiRelog ==="));
+        sender.sendMessage(Utils.translateColors("&6=== AntiRelog ==="));
 
         if (sender.hasPermission("antirelog.give")) {
-            sender.sendMessage(Utils.color("&e/antirelog give <игрок> &7- Выдать режим боя игроку"));
-            sender.sendMessage(Utils.color("&e/antirelog give all &7- Выдать режим боя всем игрокам"));
+            sender.sendMessage(Utils.translateColors("&e/antirelog give <игрок> &7- Выдать режим боя игроку"));
+            sender.sendMessage(Utils.translateColors("&e/antirelog give all &7- Выдать режим боя всем игрокам"));
         }
 
         if (sender.hasPermission("antirelog.reload")) {
-            sender.sendMessage(Utils.color("&e/antirelog reload &7- Перезагрузить конфигурацию"));
+            sender.sendMessage(Utils.translateColors("&e/antirelog reload &7- Перезагрузить конфигурацию"));
         }
 
         if (!sender.hasPermission("antirelog.give") && !sender.hasPermission("antirelog.reload")) {
-            sender.sendMessage(Utils.color("&cУ вас нет прав для использования команд"));
+            sender.sendMessage(Utils.translateColors("&cУ вас нет прав для использования команд"));
         }
     }
 
@@ -46,52 +46,52 @@ public class AntiRelogCommand {
     @Permission("antirelog.give")
     void givePvPToPlayer(@Context CommandSender sender, @Arg Player target) {
         if (pvpManager.isInPvP(target)) {
-            sender.sendMessage(Utils.color("&cИгрок &e" + target.getName() + " &cуже в режиме боя"));
+            sender.sendMessage(Utils.translateColors("&cИгрок &e" + target.getName() + " &cуже в режиме боя"));
             return;
         }
 
         pvpManager.forceStartPvP(target);
-        sender.sendMessage(Utils.color("&aРежим боя выдан игроку &e" + target.getName()));
-        target.sendMessage(Utils.color("&cВы вошли в пвп!"));
+        sender.sendMessage(Utils.translateColors("&aРежим боя выдан игроку &e" + target.getName()));
+        target.sendMessage(Utils.translateColors("&cВы вошли в пвп!"));
     }
 
     @Execute(name = "give")
     @Permission("antirelog.give")
     void givePvPToAll(@Context CommandSender sender, @Arg("all") String all) {
         if (!"all".equalsIgnoreCase(all)) {
-            sender.sendMessage(Utils.color("&cИспользование: /antirelog give all"));
+            sender.sendMessage(Utils.translateColors("&cИспользование: /antirelog give all"));
             return;
         }
 
         int count = 0;
         for (Player player : Bukkit.getOnlinePlayers()) {
-            if (!pvpManager.isInPvP(player) && !pvpManager.isHasBypassPermission(player)) {
+            if (!pvpManager.isInPvP(player) && !pvpManager.hasBypassPermission(player)) {
                 pvpManager.forceStartPvP(player);
-                player.sendMessage(Utils.color("&cВсем игрокам выдан режим боя"));
+                player.sendMessage(Utils.translateColors("&cВсем игрокам выдан режим боя"));
                 count++;
             }
         }
 
         if (count > 0) {
-            sender.sendMessage(Utils.color("&aРежим боя выдан &e" + count + " &aигрокам"));
+            sender.sendMessage(Utils.translateColors("&aРежим боя выдан &e" + count + " &aигрокам"));
         } else {
-            sender.sendMessage(Utils.color("&cНет игроков для выдачи режима боя"));
+            sender.sendMessage(Utils.translateColors("&cНет игроков для выдачи режима боя"));
         }
     }
 
     @Execute(name = "reload")
     @Permission("antirelog.reload")
     void reloadConfig(@Context CommandSender sender) {
-        Plugin pluginInstance = (this.plugin instanceof Plugin) ? (Plugin) this.plugin : Bukkit.getPluginManager().getPlugin("AntiRelog");
+        Plugin pluginInstance = (this.plugin != null) ? (Plugin) this.plugin : Bukkit.getPluginManager().getPlugin("AntiRelog");
         if (pluginInstance == null) {
-            sender.sendMessage(Utils.color("&cОшибка: Плагин не найден для выполнения."));
+            sender.sendMessage(Utils.translateColors("&cОшибка: Плагин не найден для выполнения."));
             return;
         }
 
         pluginInstance.getServer().getAsyncScheduler().runNow(pluginInstance, task -> {
             this.plugin.reloadSettings();
             pluginInstance.getServer().getScheduler().runTask(pluginInstance, () -> {
-                sender.sendMessage(Utils.color("&aКонфигурация перезагружена"));
+                sender.sendMessage(Utils.translateColors("&aКонфигурация перезагружена"));
             });
         });
     }

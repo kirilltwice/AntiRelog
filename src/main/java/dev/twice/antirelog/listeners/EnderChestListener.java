@@ -59,7 +59,7 @@ public class EnderChestListener implements Listener {
     private void sendDisabledInPvPMessage(Player player) {
         String messageKey = settings.getMessages().getItemDisabledInPvp();
         if (messageKey != null && !messageKey.isEmpty()) {
-            Component messageComponent = LegacyComponentSerializer.legacySection().deserialize(Utils.color(messageKey));
+            Component messageComponent = LegacyComponentSerializer.legacySection().deserialize(Utils.translateColors(messageKey));
             player.sendMessage(messageComponent);
         }
     }

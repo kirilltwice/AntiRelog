@@ -15,7 +15,7 @@ public class Utils {
             LegacyComponentSerializer.legacySection();
     private static final Pattern HEX_PATTERN = Pattern.compile("&#([A-Fa-f0-9]{6})");
 
-    public String color(String message) {
+    public String translateColors(String message) {
         if (message == null || message.isEmpty()) {
             return message;
         }
@@ -24,12 +24,12 @@ public class Utils {
         return ChatColor.translateAlternateColorCodes('&', message);
     }
 
-    public Component colorize(String message) {
+    public Component translateColorsToComponent(String message) {
         if (message == null || message.isEmpty()) {
             return Component.empty();
         }
 
-        return LEGACY_SERIALIZER.deserialize(color(message));
+        return LEGACY_SERIALIZER.deserialize(translateColors(message));
     }
 
     private String translateHexCodes(String message) {
@@ -62,7 +62,7 @@ public class Utils {
         };
     }
 
-    public String replaceTime(String message, int timeInSeconds) {
+    public String replaceTimePlaceholders(String message, int timeInSeconds) {
         String timeString = String.valueOf(timeInSeconds);
         String formattedSeconds = formatTimeUnit("секунд", "у", "ы", "", timeInSeconds);
 
@@ -70,33 +70,4 @@ public class Utils {
                 .replace("%formated-sec%", formattedSeconds);
     }
 
-    public Component replaceTimeComponent(String message, int timeInSeconds) {
-        String replacedMessage = replaceTime(message, timeInSeconds);
-        return colorize(replacedMessage);
-    }
-
-    public String formatDuration(int seconds) {
-        if (seconds < 60) {
-            return seconds + formatTimeUnit(" секунд", "у", "ы", "", seconds);
-        }
-
-        int minutes = seconds / 60;
-        int remainingSeconds = seconds % 60;
-
-        StringBuilder result = new StringBuilder();
-        result.append(minutes)
-                .append(formatTimeUnit(" минут", "у", "ы", "", minutes));
-
-        if (remainingSeconds > 0) {
-            result.append(" ")
-                    .append(remainingSeconds)
-                    .append(formatTimeUnit(" секунд", "у", "ы", "", remainingSeconds));
-        }
-
-        return result.toString();
-    }
-
-    public Component formatDurationComponent(int seconds) {
-        return colorize(formatDuration(seconds));
-    }
 }

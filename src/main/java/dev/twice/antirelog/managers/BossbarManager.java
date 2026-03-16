@@ -36,7 +36,7 @@ public final class BossbarManager {
 
         for (int timeRemaining = 1; timeRemaining <= settings.getPvpTime(); timeRemaining++) {
             double currentProgress = (double) timeRemaining * progressIncrement;
-            String formattedTitle = Utils.color(Utils.replaceTime(titleTemplate, timeRemaining));
+            String formattedTitle = Utils.translateColors(Utils.replaceTimePlaceholders(titleTemplate, timeRemaining));
 
             BossBar bossBar = Bukkit.createBossBar(formattedTitle, BarColor.RED, BarStyle.SOLID);
             bossBar.setProgress(Math.clamp(currentProgress, 0.0, 1.0));
@@ -81,9 +81,4 @@ public final class BossbarManager {
         return activePlayerBars.containsKey(player);
     }
 
-    public void updateBossbar(Player player, int newTimeRemaining) {
-        if (hasActiveBossbar(player)) {
-            setBossBar(player, newTimeRemaining);
-        }
-    }
 }

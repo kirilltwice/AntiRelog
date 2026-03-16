@@ -4,7 +4,6 @@ import com.Zrips.CMI.CMI;
 import com.Zrips.CMI.Containers.CMIUser;
 import de.myzelyam.api.vanish.VanishAPI;
 import lombok.RequiredArgsConstructor;
-import me.libraryaddict.disguise.DisguiseAPI;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
@@ -21,9 +20,7 @@ public class PowerUpsManager {
     private final Settings settings;
 
     private boolean vanishAPIEnabled;
-    private boolean libsDisguisesEnabled;
     private boolean cmiEnabled;
-    private Object vanishNoPacketPluginInstance;
     private Object essentialsPluginInstance;
 
     {
@@ -41,12 +38,11 @@ public class PowerUpsManager {
         disabledSomething |= disableEssentialsFeatures(player);
         disabledSomething |= disableCMIFeatures(player);
         disabledSomething |= disableVanishFeatures(player);
-        disabledSomething |= disableDisguiseFeatures(player);
 
         return disabledSomething;
     }
 
-    public void disablePowerUpsWithRunCommands(Player player) {
+    public void disablePowerUpsAndRunCommands(Player player) {
         if (!disablePowerUps(player) || settings.getCommandsOnPowerupsDisable().isEmpty()) {
             return;
         }
@@ -58,7 +54,7 @@ public class PowerUpsManager {
 
         String message = settings.getMessages().getPvpStartedWithPowerups();
         if (message != null && !message.isEmpty() && player.isOnline()) {
-            Component component = LegacyComponentSerializer.legacySection().deserialize(Utils.color(message));
+            Component component = LegacyComponentSerializer.legacySection().deserialize(Utils.translateColors(message));
             player.sendMessage(component);
         }
     }
@@ -67,9 +63,7 @@ public class PowerUpsManager {
         PluginManager pluginManager = Bukkit.getPluginManager();
 
         this.vanishAPIEnabled = isPluginEnabled(pluginManager, "SuperVanish", "PremiumVanish");
-        this.vanishNoPacketPluginInstance = getVanishNoPacketPluginInstance(pluginManager);
         this.essentialsPluginInstance = getEssentialsPluginInstance(pluginManager);
-        this.libsDisguisesEnabled = pluginManager.isPluginEnabled("LibsDisguises");
         this.cmiEnabled = pluginManager.isPluginEnabled("CMI");
     }
 
@@ -151,31 +145,7 @@ public class PowerUpsManager {
                 }
             } catch (Exception ignored) {}
         }
-        if (this.vanishNoPacketPluginInstance != null) {
-            try {
-                Object manager = this.vanishNoPacketPluginInstance.getClass().getMethod("getManager").invoke(this.vanishNoPacketPluginInstance);
-                if (manager == null) return disabled;
-                Object isVanishedResult = manager.getClass().getMethod("isVanished", Player.class).invoke(manager, player);
-                if (isVanishedResult instanceof Boolean && (Boolean) isVanishedResult) {
-                    manager.getClass().getMethod("toggleVanishQuiet", Player.class, boolean.class).invoke(manager, player, false);
-                    disabled = true;
-                }
-            } catch (Exception ignored) {}
-        }
         return disabled;
-    }
-
-    private boolean disableDisguiseFeatures(Player player) {
-        if (!this.libsDisguisesEnabled) {
-            return false;
-        }
-        try {
-            if (DisguiseAPI.isSelfDisguised(player)) {
-                DisguiseAPI.undisguiseToAll(player);
-                return true;
-            }
-        } catch (Exception ignored) {}
-        return false;
     }
 
     private boolean isPluginEnabled(PluginManager manager, String... pluginNames) {
@@ -200,16 +170,4 @@ public class PowerUpsManager {
         }
     }
 
-    private Object getVanishNoPacketPluginInstance(PluginManager manager) {
-        if (!manager.isPluginEnabled("VanishNoPacket")) {
-            return null;
-        }
-        try {
-            Plugin plugin = manager.getPlugin("VanishNoPacket");
-            Class<?> vanishPluginClass = Class.forName("org.kitteh.vanish.VanishPlugin");
-            return vanishPluginClass.isInstance(plugin) ? plugin : null;
-        } catch (ClassNotFoundException e) {
-            return null;
-        }
-    }
 }

@@ -1,7 +1,7 @@
 name: AntiRelog
 main: dev.twice.antirelog.Main
 
-authors: [ Twice, Leymooo ]
+authors: [Twice, Leymooo]
 prefix: AntiRelog
 
 version: ${project.version}
@@ -11,9 +11,7 @@ softdepend:
   - Essentials
   - SuperVanish
   - PremiumVanish
-  - VanishNoPacket
   - WorldGuard
-  - LibsDisguises
   - CMI
 
 website: https://github.com/kirilltwice/AntiRelog

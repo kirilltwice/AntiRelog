@@ -53,7 +53,7 @@ public class CooldownManager {
         }
     }
 
-    public void enteredToPvp(Player player) {
+    public void onPvpEnter(Player player) {
         if (!player.isOnline()) {
             return;
         }
@@ -69,7 +69,7 @@ public class CooldownManager {
         }
     }
 
-    public void removedFromPvp(Player player) {
+    public void onPvpExit(Player player) {
         if (!player.isOnline()) {
             return;
         }

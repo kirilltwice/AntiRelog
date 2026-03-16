@@ -148,7 +148,6 @@
         </repository>
         <repository>
             <id>reposilite-repository-releases</id>
-            <name>Reposilite Repository</name>
             <url>https://repo.panda-lang.org/releases</url>
         </repository>
     </repositories>
@@ -191,22 +190,15 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>me.libraryaddict.disguises</groupId>
-            <artifactId>libsdisguises</artifactId>
-            <version>11.0.0</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.Zrips.CMI</groupId>
-            <artifactId>CMI</artifactId>
-            <version>ANY</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/libs/CMI-API-9.7.14.3.jar</systemPath>
-        </dependency>
-        <dependency>
             <groupId>dev.rollczi</groupId>
             <artifactId>litecommands-bukkit</artifactId>
             <version>3.9.7</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Zrips</groupId>
+            <artifactId>CMI-API</artifactId>
+            <version>9.7.14.3</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
